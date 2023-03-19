@@ -1,8 +1,9 @@
-import { findAllUsers } from "../controllers/AuthController";
+import { handleLogin, handleRegister } from "../controllers/AuthController";
 import { Router } from "express";
 
 const authRoutes = Router();
 
-authRoutes.route("/get").get(findAllUsers);
+authRoutes.route("/auth/login").post(handleLogin);
+authRoutes.route("/auth/register").post(handleRegister);
 
 export default authRoutes;

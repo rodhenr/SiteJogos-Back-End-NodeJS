@@ -18,11 +18,12 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       password: { allowNull: false, type: DataTypes.STRING(100) },
       experience: {
         allowNull: false,
-        type: DataTypes.BIGINT,
         defaultValue: 0,
+        type: DataTypes.BIGINT,
       },
       avatar: {
         allowNull: false,
+        defaultValue: "",
         type: DataTypes.STRING,
       },
     },
