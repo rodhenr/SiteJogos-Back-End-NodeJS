@@ -1,0 +1,8 @@
+USER (infos básicas)
+FRIENDS (amigos em linha)
+EXPERIENCE (quantos de experiencia pra cada level e calcular level)
+MATCHES (situacao e resultado das partidas)
+--MENSAGENS
+--RECORDES
+
+--association

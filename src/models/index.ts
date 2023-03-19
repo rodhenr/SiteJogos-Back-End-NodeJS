@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize, Model, DataTypes } from "sequelize";
 import process from "process";
 
 const basename: string = path.basename(__filename);

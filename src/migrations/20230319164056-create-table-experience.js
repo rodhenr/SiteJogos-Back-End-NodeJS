@@ -2,24 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Users", {
+    await queryInterface.createTable("Experience", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      name: {
-        type: Sequelize.STRING(100),
+      level: {
+        type: Sequelize.SMALLINT,
         allowNull: false,
       },
-      password: {
-        type: Sequelize.STRING(100),
+      experience_accumulated: {
+        type: Sequelize.BIGINT,
         allowNull: false,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Users");
+    await queryInterface.dropTable("Experience");
   },
 };

@@ -1,9 +1,9 @@
 import { Model, Sequelize } from "sequelize";
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class User extends Model {}
+  class Game extends Model {}
 
-  User.init(
+  Game.init(
     {
       id: {
         allowNull: false,
@@ -13,26 +13,30 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       },
       name: {
         allowNull: false,
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(50),
       },
-      password: { allowNull: false, type: DataTypes.STRING(100) },
-      experience: {
+      win_points: {
         allowNull: false,
-        type: DataTypes.BIGINT,
+        type: DataTypes.INTEGER,
+      },
+      draw_points: {
+        allowNull: false,
         defaultValue: 0,
+        type: DataTypes.INTEGER,
       },
-      avatar: {
+      lose_points: {
         allowNull: false,
-        type: DataTypes.STRING,
+        defaultValue: 0,
+        type: DataTypes.INTEGER,
       },
     },
     {
       sequelize,
-      tableName: "Users",
-      modelName: "User",
+      tableName: "Games",
+      modelName: "Game",
       timestamps: false,
     }
   );
 
-  return User;
+  return Game;
 };
