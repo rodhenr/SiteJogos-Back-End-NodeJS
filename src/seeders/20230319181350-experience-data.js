@@ -8,7 +8,7 @@ module.exports = {
       [
         {
           level: 1,
-          experience_accumulated: 10,
+          experience_accumulated: 0,
         },
         {
           level: 2,
