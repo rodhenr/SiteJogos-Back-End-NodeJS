@@ -13,12 +13,10 @@ module.exports = {
       win_points: { allowNull: false, type: Sequelize.INTEGER },
       draw_points: {
         allowNull: false,
-        defaultValue: 0,
         type: Sequelize.INTEGER,
       },
       lose_points: {
         allowNull: false,
-        defaultValue: 0,
         type: Sequelize.INTEGER,
       },
     });

@@ -1,15 +1,27 @@
 import { Request, Response } from "express";
-import { IExperience, IUser } from "../interfaces/InfoInterface";
+import {
+  IExperience,
+  IRecentMatches,
+  IUser,
+} from "../interfaces/InfoInterface";
 
 import db from "../models/index";
 
 const getRecentMatches = async (req: Request, res: Response) => {
   try {
-    const recentMatches = await db.Match.findAll();
+    const matchesList: IRecentMatches[] = await db.Match.findAll({
+      limit: 5,
+      raw: true,
+      include: [
+        { model: db.User, attributes: ["name"] },
+        { model: db.Game, attributes: ["name"] },
+      ],
+      attributes: {
+        exclude: ["userID", "gameID"],
+      },
+    });
 
-    const filteredMatches: any[] = [];
-
-    res.status(200).send(filteredMatches);
+    res.status(200).send(matchesList);
   } catch (err) {
     console.log(err);
     res.status(500).send("Aconteceu um erro no seu registro...");
@@ -23,12 +35,12 @@ const getPlayerRanking = async (req: Request, res: Response) => {
       attributes: ["id", "name", "experience"],
     });
 
-    const experience: IExperience[] = await db.Experience.findAll({
+    const experienceList: IExperience[] = await db.Experience.findAll({
       raw: true,
     });
 
     const userListWithLevel = userList.map((user) => {
-      const level = experience
+      const level = experienceList
         .filter((lvl) => {
           return Number(lvl.experience_accumulated) <= Number(user.experience);
         })

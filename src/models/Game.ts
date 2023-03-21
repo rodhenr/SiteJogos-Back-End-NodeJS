@@ -21,12 +21,10 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       },
       draw_points: {
         allowNull: false,
-        defaultValue: 0,
         type: DataTypes.INTEGER,
       },
       lose_points: {
         allowNull: false,
-        defaultValue: 0,
         type: DataTypes.INTEGER,
       },
     },
