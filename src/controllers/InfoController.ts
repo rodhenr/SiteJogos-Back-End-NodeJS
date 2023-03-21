@@ -8,9 +8,13 @@ import {
 import db from "../models/index";
 
 const getRecentMatches = async (req: Request, res: Response) => {
+  const { limit } = req.body;
+
+  if (!Number(limit)) return res.status(401).send("Parâmetro inválido.");
+
   try {
     const matchesList: IRecentMatches[] = await db.Match.findAll({
-      limit: 5,
+      limit: Number(limit),
       raw: true,
       include: [
         { model: db.User, attributes: ["name"] },
@@ -29,8 +33,13 @@ const getRecentMatches = async (req: Request, res: Response) => {
 };
 
 const getPlayerRanking = async (req: Request, res: Response) => {
+  const { limit } = req.body;
+
+  if (!Number(limit)) return res.status(401).send("Parâmetro inválido.");
+
   try {
     const userList: IUser[] = await db.User.findAll({
+      limit: Number(limit),
       raw: true,
       attributes: ["id", "name", "experience"],
     });
