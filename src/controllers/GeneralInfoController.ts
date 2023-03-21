@@ -6,6 +6,8 @@ import {
 } from "../interfaces/InfoInterface";
 
 import db from "../models/index";
+import { getRecentMatchList } from "../utils/matches";
+import { getPlayerLevelByList } from "../utils/playerLevel";
 
 const getRecentMatches = async (req: Request, res: Response) => {
   const { limit } = req.body;
@@ -13,19 +15,9 @@ const getRecentMatches = async (req: Request, res: Response) => {
   if (!Number(limit)) return res.status(401).send("Parâmetro inválido.");
 
   try {
-    const matchesList: IRecentMatches[] = await db.Match.findAll({
-      limit: Number(limit),
-      raw: true,
-      include: [
-        { model: db.User, attributes: ["name"] },
-        { model: db.Game, attributes: ["name"] },
-      ],
-      attributes: {
-        exclude: ["userID", "gameID"],
-      },
-    });
+    const matchList: IRecentMatches[] = await getRecentMatchList(Number(limit));
 
-    res.status(200).send(matchesList);
+    res.status(200).send(matchList);
   } catch (err) {
     console.log(err);
     res.status(500).send("Aconteceu um erro no seu registro...");
@@ -44,24 +36,7 @@ const getPlayerRanking = async (req: Request, res: Response) => {
       attributes: ["id", "name", "experience"],
     });
 
-    const experienceList: IExperience[] = await db.Experience.findAll({
-      raw: true,
-    });
-
-    const userListWithLevel = userList.map((user) => {
-      const level = experienceList
-        .filter((lvl) => {
-          return Number(lvl.experience_accumulated) <= Number(user.experience);
-        })
-        .at(-1);
-
-      if (!level)
-        throw Error(
-          "Algo de errado aconteceu na sua requisição. Contate o suporte técnico."
-        );
-
-      return { ...user, level: Number(level.level) };
-    });
+    const userListWithLevel = await getPlayerLevelByList(userList);
 
     res.status(200).send(userListWithLevel);
   } catch (err) {
