@@ -10,7 +10,7 @@ import { getRecentMatchList } from "../utils/matches";
 import { getPlayerLevelByList } from "../utils/playerLevel";
 
 const getRecentMatches = async (req: Request, res: Response) => {
-  const { limit } = req.body;
+  const { limit } = req.query;
 
   if (!Number(limit)) return res.status(401).send("Parâmetro inválido.");
 
@@ -25,9 +25,9 @@ const getRecentMatches = async (req: Request, res: Response) => {
 };
 
 const getPlayerRanking = async (req: Request, res: Response) => {
-  const { limit } = req.body;
+  const { limit } = req.query;
 
-  if (!Number(limit)) return res.status(401).send("Parâmetro inválido.");
+  if (!Number(limit)) return res.status(400).send("Parâmetro inválido.");
 
   try {
     const userList: IUser[] = await db.User.findAll({

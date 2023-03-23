@@ -16,7 +16,7 @@ export const getUniquePlayerLevel = (
       "Algo de errado aconteceu na sua requisição. Contate o suporte técnico."
     );
 
-  return { ...userInfo, level: Number(level.level) };
+  return { id: userInfo.id, name: userInfo.name, level: Number(level.level) };
 };
 
 export const getPlayerLevelByList = async (userInfo: IUser[]) => {
