@@ -7,7 +7,10 @@ import {
 
 import db from "../models/index";
 import { getRecentMatchList } from "../utils/matches";
-import { getPlayerLevelByList } from "../utils/playerLevel";
+import {
+  getPlayerLevelByList,
+  getUniquePlayerLevel,
+} from "../utils/playerLevel";
 
 const getRecentMatches = async (req: Request, res: Response) => {
   const { limit } = req.query;
@@ -20,7 +23,7 @@ const getRecentMatches = async (req: Request, res: Response) => {
     res.status(200).send(matchList);
   } catch (err) {
     console.log(err);
-    res.status(500).send("Aconteceu um erro no seu registro...");
+    res.status(500).send("Aconteceu um erro na sua requisição...");
   }
 };
 
@@ -38,11 +41,52 @@ const getPlayerRanking = async (req: Request, res: Response) => {
 
     const userListWithLevel = await getPlayerLevelByList(userList);
 
-    res.status(200).send(userListWithLevel);
+    const userListOrdered = userListWithLevel.sort((a, b) => {
+      if (a.level !== b.level) {
+        return b.level - a.level;
+      } else {
+        return b.experience - a.experience;
+      }
+    });
+
+    const userByPosition = userListOrdered.map((user, index) => {
+      const { experience, ...userData } = user;
+
+      return { ...userData, position: index + 1 };
+    });
+
+    res.status(200).send(userByPosition);
   } catch (err) {
     console.log(err);
-    res.status(500).send("Aconteceu um erro no seu registro...");
+    res.status(500).send("Aconteceu um erro na sua requisição...");
   }
 };
 
-export { getPlayerRanking, getRecentMatches };
+const getUserInfoFromRanking = async (req: Request, res: Response) => {
+  const { userID } = req.query;
+
+  if (!userID) return res.status(400).send("Parâmetros inválidos.");
+
+  try {
+    const userInfo = await db.User.findOne({
+      where: { id: userID },
+      raw: true,
+    });
+
+    if (!userInfo) return res.status(400).send("Usuário não encontrado.");
+
+    const experienceList: IExperience[] = await db.Experience.findAll({
+      raw: true,
+    });
+
+    const userInfoWithLevel = getUniquePlayerLevel(experienceList, userInfo);
+
+    return res
+      .status(200)
+      .send({ ...userInfoWithLevel, ranking: 1, statistics: [] });
+  } catch (err) {
+    res.status(500).send("Aconteceu um erro na sua requisição...");
+  }
+};
+
+export { getPlayerRanking, getRecentMatches, getUserInfoFromRanking };

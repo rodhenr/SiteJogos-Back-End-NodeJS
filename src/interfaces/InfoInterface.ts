@@ -20,3 +20,18 @@ export interface IRecentMatches {
   "User.name": string;
   "Game.name": string;
 }
+
+interface IStatistics {
+  game: string;
+  wins: number;
+  loses: number;
+}
+
+export interface IUserInfo {
+  playerID: number | null;
+  playerName: string | null;
+  playerAvatar: string | null;
+  statistics: IStatistics[] | [];
+  ranking: number | null;
+  level: number | null;
+}
