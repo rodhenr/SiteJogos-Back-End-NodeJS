@@ -35,3 +35,8 @@ export interface IUserInfo {
   ranking: number | null;
   level: number | null;
 }
+
+export interface IJWTDecoded {
+  name: string;
+  user: string;
+}

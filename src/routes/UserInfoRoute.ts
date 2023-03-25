@@ -1,9 +1,17 @@
-import { getUserMatchesHistory } from "../controllers/UserInfoController";
-
 import { Router } from "express";
+
+import {
+  getUserMatchesHistory,
+  getUserBasicInfo,
+} from "../controllers/UserInfoController";
+
+import { verifyJWT } from "../middlewares/authMiddleware";
 
 const userInfoRoutes = Router();
 
-userInfoRoutes.route("/api/user/match/history").get(getUserMatchesHistory);
+userInfoRoutes
+  .route("/api/user/match/history")
+  .get(verifyJWT, getUserMatchesHistory);
+userInfoRoutes.route("/api/user/info/basic").get(verifyJWT, getUserBasicInfo);
 
 export default userInfoRoutes;
