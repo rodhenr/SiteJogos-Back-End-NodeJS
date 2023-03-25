@@ -34,14 +34,18 @@ const getUserBasicInfo = async (req: Request | any, res: Response) => {
   }
 };
 
-const getUserMatchesHistory = async (req: Request, res: Response) => {
-  const { userID, limit } = req.body;
+const getUserMatchesHistory = async (req: Request | any, res: Response) => {
+  const { user } = req;
+  const { limit } = req.query;
 
-  if (!Number(userID) || !Number(limit))
-    return res.status(401).send("ID de usuário é inválido.");
+  if (!user || !Number(limit))
+    return res.status(401).json({
+      message:
+        "Ocorreu um erro na sua requisição. Não foi possível determinar o usuário.",
+    });
 
   try {
-    const matchesHistory = await getPlayerMatchList(userID, Number(limit));
+    const matchesHistory = await getPlayerMatchList(user, Number(limit));
 
     res.status(200).send(matchesHistory);
   } catch (err) {

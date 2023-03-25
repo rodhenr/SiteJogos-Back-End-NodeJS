@@ -10,7 +10,7 @@ import { verifyJWT } from "../middlewares/authMiddleware";
 const userInfoRoutes = Router();
 
 userInfoRoutes
-  .route("/api/user/match/history")
+  .route("/api/user/info/matches")
   .get(verifyJWT, getUserMatchesHistory);
 userInfoRoutes.route("/api/user/info/basic").get(verifyJWT, getUserBasicInfo);
 

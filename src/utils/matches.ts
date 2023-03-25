@@ -1,17 +1,26 @@
-import { IRecentMatches } from "../interfaces/InfoInterface";
+import { IRecentMatches, IUser } from "../interfaces/InfoInterface";
 
 import db from "../models";
 
-export const getPlayerMatchList = async (userID: string, limit: number) => {
+export const getPlayerMatchList = async (user: string, limit: number) => {
+  const userData: IUser = await db.User.findOne({
+    where: { user },
+    raw: true,
+  });
+
+  if (!userData) {
+    throw Error("Usuário não localizado.");
+  }
+
   const matchList: IRecentMatches[] = await db.Match.findAll({
     limit: Number(limit),
     where: {
-      userID: userID,
+      userID: userData.id,
     },
     raw: true,
     include: [{ model: db.Game, attributes: ["name"] }],
     attributes: {
-      exclude: ["userID", "gameID"],
+      exclude: ["userID", "gameID", "isProcessed"],
     },
   });
 
