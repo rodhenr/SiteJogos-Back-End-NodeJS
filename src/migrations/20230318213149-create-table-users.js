@@ -13,6 +13,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(100),
       },
+      user: {
+        allowNull: false,
+        type: Sequelize.STRING(20),
+      },
       password: {
         allowNull: false,
         type: Sequelize.STRING(100),

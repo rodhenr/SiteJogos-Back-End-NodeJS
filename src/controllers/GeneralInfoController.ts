@@ -79,11 +79,39 @@ const getUserInfoFromRanking = async (req: Request, res: Response) => {
       raw: true,
     });
 
+    const userList: IUser[] = await db.User.findAll({
+      raw: true,
+      attributes: ["id", "name", "experience"],
+    });
+
+    const userListWithLevel = await getPlayerLevelByList(userList);
+
+    const userListOrdered = userListWithLevel.sort((a, b) => {
+      if (a.level !== b.level) {
+        return b.level - a.level;
+      } else {
+        return b.experience - a.experience;
+      }
+    });
+
+    const userByPosition = userListOrdered.map((user, index) => {
+      const { experience, ...userData } = user;
+
+      return { ...userData, position: index + 1 };
+    });
+
+    const userRanking = userByPosition.filter(
+      (user) => user.id === Number(userID)
+    );
+
     const userInfoWithLevel = getUniquePlayerLevel(experienceList, userInfo);
 
-    return res
-      .status(200)
-      .send({ ...userInfoWithLevel, ranking: 1, statistics: [] });
+    return res.status(200).send({
+      ...userInfoWithLevel,
+      avatar: userInfo.avatar,
+      ranking: userRanking.length > 0 ? userRanking[0].position : 0,
+      statistics: [],
+    });
   } catch (err) {
     res.status(500).send("Aconteceu um erro na sua requisição...");
   }
