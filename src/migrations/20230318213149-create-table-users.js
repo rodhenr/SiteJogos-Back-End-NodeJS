@@ -28,7 +28,7 @@ module.exports = {
       },
       avatar: {
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: "",
         type: Sequelize.STRING,
       },
     });
