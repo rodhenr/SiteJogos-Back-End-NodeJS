@@ -3,7 +3,13 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import db from "../models/index";
+import {
+  createNewUser,
+  createTokens,
+  isUserRegistered,
+  verifyRefreshToken,
+} from "../services/authService";
+import { findOneUser } from "../services/userService";
 
 const handleRegister = async (req: Request, res: Response) => {
   const { name, user, password } = req.body;
@@ -12,27 +18,23 @@ const handleRegister = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Informações inválidas" });
 
   try {
-    const isUserRegistered = await db.User.findOne({
-      where: { user },
-    });
+    const userRegistered = await isUserRegistered(user);
 
-    if (isUserRegistered)
+    if (userRegistered)
       return res.status(401).json({ message: "Usuário já registrado" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.User.create({
-      name,
-      user,
-      password: hashedPassword,
-    });
+    await createNewUser(name, user, hashedPassword);
 
-    res.status(200).json("Usuário registrado com sucesso!");
+    res.status(200).json({ message: "Usuário registrado com sucesso!" });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ status: 500, message: "Aconteceu um erro no seu registro..." });
+
+    res.status(500).json({
+      message:
+        "Ocorreu um erro na sua requisição. Por favor, contate o suporte técnico.",
+    });
   }
 };
 
@@ -40,38 +42,20 @@ const handleLogin = async (req: Request, res: Response) => {
   const { user, password } = req.body;
 
   if (!user || !password)
-    return res.status(401).send("As informações de login não são válidas");
+    return res
+      .status(401)
+      .json({ message: "As informações de login não são válidas" });
 
   try {
-    if (!process.env.jwt_secret || !process.env.jwt_secret_refresh)
-      throw Error("Server error");
-
-    const userData = await db.User.findOne({
-      where: { user },
-      raw: true,
-    });
-
-    if (!userData) return res.status(401).send("Login inválido");
+    const userData = await findOneUser(user);
+    if (!userData) return res.status(401).json({ message: "Login inválido" });
 
     const isMatch = await bcrypt.compare(password, userData.password);
+    if (!isMatch) return res.status(401).json({ message: "Login inválido" });
 
-    if (!isMatch) return res.status(401).send("Login inválido");
-
-    const { name: usernameToken, user: userToken } = userData;
-
-    const accessToken = jwt.sign(
-      { name: usernameToken, user: userToken },
-      process.env.jwt_secret,
-      {
-        expiresIn: 100 * 60,
-      }
-    );
-    const refreshToken = jwt.sign(
-      { name: usernameToken, user: userToken },
-      process.env.jwt_secret_refresh,
-      {
-        expiresIn: 15 * 60,
-      }
+    const { accessToken, refreshToken } = createTokens(
+      userData.name,
+      userData.user
     );
 
     res.cookie("jwt", refreshToken, {
@@ -81,58 +65,57 @@ const handleLogin = async (req: Request, res: Response) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ accessToken, username: usernameToken });
-  } catch (err) {
+    res.status(200).json({ accessToken, username: userData.name });
+  } catch (err: any) {
     console.log(err);
-    res.status(500).send("Ops... Ocorreu um erro no servidor.");
+
+    res.status(500).json({
+      message: err?.message
+        ? err.mesage
+        : "Ocorreu um erro na sua requisição. Por favor, entre em contato com o suporte técnico.",
+    });
   }
 };
 
 const handleRefreshToken = (req: Request, res: Response) => {
-  if (!process.env.jwt_secret || !process.env.jwt_secret_refresh)
-    throw Error("Server error");
+  try {
+    const cookies = req.cookies;
 
-  const cookies = req.cookies;
+    if (!cookies?.jwt)
+      return res.status(401).json({ message: "Token não localizado." });
 
-  if (!cookies?.jwt) return res.sendStatus(401);
+    const refreshTokenCookie = cookies.jwt;
+    res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
 
-  const refreshToken = cookies.jwt;
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
+    const decoded = verifyRefreshToken(refreshTokenCookie) as {
+      user: string;
+      name: string;
+    };
 
-  jwt.verify(
-    refreshToken,
-    process.env.jwt_secret_refresh,
-    (err: any, decoded: any) => {
-      if (err) {
-        return res.status(406).json("Token expirado.");
-      } else {
-        const { user } = decoded;
+    if (!decoded)
+      return res
+        .status(401)
+        .json({ message: "Ocorreu um problema na verificação do token." });
 
-        if (!user) return res.status(401).send("Token com dados inválidos.");
+    const { accessToken, refreshToken } = createTokens(
+      decoded.name,
+      decoded.user
+    );
 
-        const accessToken = jwt.sign({ user }, process.env.jwt_secret!, {
-          expiresIn: 100 * 60,
-        });
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
-        const refreshToken = jwt.sign(
-          { user },
-          process.env.jwt_secret_refresh!,
-          {
-            expiresIn: 15 * 60,
-          }
-        );
-
-        res.cookie("jwt", refreshToken, {
-          httpOnly: true,
-          sameSite: "none",
-          secure: true,
-          maxAge: 24 * 60 * 60 * 1000,
-        });
-
-        return res.json({ accessToken, user: user });
-      }
-    }
-  );
+    return res.status(200).json({ accessToken, username: decoded.name });
+  } catch (err) {
+    res.status(500).json({
+      message:
+        "Ocorreu um erro na sua requisição. Por favor, entre em contato com o suporte técnico.",
+    });
+  }
 };
 
 export { handleLogin, handleRegister, handleRefreshToken };
