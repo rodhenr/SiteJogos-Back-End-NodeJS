@@ -7,17 +7,24 @@ export interface IUser {
   avatar: "";
 }
 
+export interface IUserSafe {
+  id: number;
+  name: string;
+  user: string;
+  experience: number;
+  avatar: "";
+}
+
 export interface IExperience {
   id: number;
   level: number;
   experience_accumulated: number;
 }
 
-export interface IRecentMatches {
+export interface IMatch {
   id: number;
   date: Date;
   is_win: boolean;
-  is_processed: boolean;
   "User.name": string;
   "Game.name": string;
 }
@@ -40,4 +47,16 @@ export interface IUserInfo {
 export interface IJWTDecoded {
   name: string;
   user: string;
+}
+
+export interface IGameStats {
+  game: string;
+  wins: number;
+  loses: number;
+}
+
+export interface IUserFriends {
+  avatar: string;
+  id: number;
+  name: string;
 }

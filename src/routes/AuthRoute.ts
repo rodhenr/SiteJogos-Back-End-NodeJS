@@ -1,9 +1,10 @@
+import { Router } from "express";
+
 import {
   handleLogin,
   handleRegister,
   handleRefreshToken,
 } from "../controllers/AuthController";
-import { Router } from "express";
 
 const authRoutes = Router();
 

@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 import {
   createNewUser,
@@ -9,6 +8,7 @@ import {
   isUserRegistered,
   verifyRefreshToken,
 } from "../services/authService";
+
 import { findOneUser } from "../services/userService";
 
 const handleRegister = async (req: Request, res: Response) => {
