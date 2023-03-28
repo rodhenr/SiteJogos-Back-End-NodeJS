@@ -62,6 +62,27 @@ module.exports = {
           is_win: false,
           is_processed: true,
         },
+        {
+          userID: 2,
+          gameID: 1,
+          date: "2023-03-19 19:00:00",
+          is_win: true,
+          is_processed: true,
+        },
+        {
+          userID: 2,
+          gameID: 1,
+          date: "2023-03-19 19:00:00",
+          is_win: false,
+          is_processed: true,
+        },
+        {
+          userID: 2,
+          gameID: 1,
+          date: "2023-03-19 19:00:00",
+          is_win: true,
+          is_processed: true,
+        },
       ],
       {}
     );

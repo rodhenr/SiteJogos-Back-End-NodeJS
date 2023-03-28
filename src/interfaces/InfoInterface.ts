@@ -25,7 +25,7 @@ export interface IMatch {
   id: number;
   date: Date;
   is_win: boolean;
-  UserID: string;
+  userID: string;
   "User.name": string;
   "Game.name": string;
 }
@@ -62,18 +62,33 @@ export interface IUserFriends {
   name: string;
 }
 
-export interface IGames {
-  [key: string]: IMatch[];
+interface IMatchRecords {
+  gameName: string;
+  userName: string;
+  userID: number;
+  totalWins: number;
 }
 
-export interface IGamePlayerList {
-  UserID: string;
-  "User.name": string;
-  "Game.name": string;
+export interface IGames {
+  [key: string]: IMatchRecords[];
+}
+
+export interface IGamePlayerInfo {
+  userID: string;
+  username: string;
   wins: number;
-  loses: number;
 }
 
 export interface IGameListByPlayer {
-  [key: string]: IGamePlayerList[];
+  [key: string]: IMatchRecords[];
+}
+
+export interface IMatchesGroup {
+  id: number;
+  name: string;
+  totalWins: number;
+  "User.id": number;
+  "User.name": string;
+  "Game.id": number;
+  "Game.name": string;
 }
