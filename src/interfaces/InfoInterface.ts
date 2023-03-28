@@ -25,6 +25,7 @@ export interface IMatch {
   id: number;
   date: Date;
   is_win: boolean;
+  UserID: string;
   "User.name": string;
   "Game.name": string;
 }
@@ -59,4 +60,20 @@ export interface IUserFriends {
   avatar: string;
   id: number;
   name: string;
+}
+
+export interface IGames {
+  [key: string]: IMatch[];
+}
+
+export interface IGamePlayerList {
+  UserID: string;
+  "User.name": string;
+  "Game.name": string;
+  wins: number;
+  loses: number;
+}
+
+export interface IGameListByPlayer {
+  [key: string]: IGamePlayerList[];
 }

@@ -8,6 +8,7 @@ import authRoutes from "./src/routes/authRoute";
 import rankingRoutes from "./src/routes/rankingRoute";
 import matchesRoutes from "./src/routes/matchRoute";
 import userRoutes from "./src/routes/userRoute";
+import recordRoutes from "./src/routes/recordRoute";
 
 const port = 8080;
 const app: Express = express();
@@ -22,6 +23,7 @@ app.use(authRoutes);
 app.use(rankingRoutes);
 app.use(matchesRoutes);
 app.use(userRoutes);
+app.use(recordRoutes);
 
 app.listen(port, () => {
   console.log(`Servidor iniciado na porta ${port}!`);

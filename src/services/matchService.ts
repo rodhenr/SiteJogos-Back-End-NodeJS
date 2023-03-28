@@ -5,7 +5,7 @@ import db from "../models";
 export const getMatchesList = async (limit: number) => {
   const matchList: IMatch[] = await db.Match.findAll({
     attributes: {
-      exclude: ["userID", "gameID", "isProcessed"],
+      exclude: ["gameID", "isProcessed"],
     },
     include: [
       { model: db.User, attributes: ["name"] },

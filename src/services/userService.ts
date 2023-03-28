@@ -129,7 +129,7 @@ export const findUserStatistics = async (id: number) => {
   if (userMatches.length > 0) {
     for (const match of userMatches) {
       const gameIndex = statistics.findIndex((statistic) => {
-        statistic.game === match["Game.name"];
+        return statistic.game === match["Game.name"];
       });
 
       if (gameIndex === -1) {
