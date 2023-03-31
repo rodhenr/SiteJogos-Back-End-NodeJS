@@ -18,10 +18,7 @@ const handleRegister = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Informações inválidas" });
 
   try {
-    const userRegistered = await isUserRegistered(user);
 
-    if (userRegistered)
-      return res.status(401).json({ message: "Usuário já registrado" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
