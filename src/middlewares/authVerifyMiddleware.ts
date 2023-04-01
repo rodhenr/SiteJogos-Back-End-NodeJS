@@ -6,24 +6,29 @@ const verifyRegisterFields = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.body.user || !req.body.name || !req.body.password) {
+  const { user, name, password } = req.body;
+
+  if (!user || !name || !password) {
     return res.status(400).json({ message: "Dados inválidos" });
   }
 
-  if (req.body.user.length < 4) {
-    return res.status(400).json({ message: "Usuário inválido" });
+  if (user.length < 4 || !/^[a-zA-Z]+$/.test(user.trim())) {
+    return res.status(400).json({
+      message:
+        "O usuário contém caracteres inválidos ou possui menos de 4 caracteres",
+    });
   }
 
-  if (req.body.name.length < 4) {
+  if (name.length < 4 || !/^[a-zA-Z\s]+$/.test(name.trim())) {
     return res.status(400).json({ message: "Nome inválido" });
   }
 
-  if (req.body.password.length < 8) {
+  if (password.length < 8) {
     return res.status(400).json({ message: "Senha inválida" });
   }
 
   try {
-    const userRegistered = await isUserRegistered(req.body.user);
+    const userRegistered = await isUserRegistered(user);
 
     if (userRegistered)
       return res.status(401).json({ message: "Usuário já registrado" });

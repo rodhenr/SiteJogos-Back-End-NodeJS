@@ -14,12 +14,7 @@ import { findOneUser } from "../services/userService";
 const handleRegister = async (req: Request, res: Response) => {
   const { name, user, password } = req.body;
 
-  if (!name || !password)
-    return res.status(400).json({ message: "Informações inválidas" });
-
   try {
-
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await createNewUser(name, user, hashedPassword);
