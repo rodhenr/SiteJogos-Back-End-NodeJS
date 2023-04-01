@@ -195,5 +195,6 @@ export const getUserCompleteInfo = async (user: string) => {
     ...userDataWithLevelAndRanking,
     friends: userFriends,
     statistics: userStatistics,
+    experience: userData.experience,
   };
 };
