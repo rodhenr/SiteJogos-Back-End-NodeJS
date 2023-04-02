@@ -7,10 +7,9 @@ const verifyJWT = (req: Request | any, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader)
       return res.status(401).json({ message: "Nenhum token encontrado" });
-
+      
     if (!authHeader.startsWith("Bearer "))
       return res.status(401).json({ message: "Nenhum token encontrado" });
-
     const token = authHeader.split(" ")[1];
 
     jwt.verify(token, process.env.jwt_secret!, (err: any, decoded: any) => {

@@ -26,7 +26,7 @@ const getUserMatches = async (req: Request | any, res: Response) => {
   const { user } = req;
   const { limit } = req.query;
 
-  if (!user || !Number(limit))
+  if (!user || isNaN(limit))
     return res.status(401).json({
       message:
         "Ocorreu um erro na sua requisição. Não foi possível determinar o usuário.",
