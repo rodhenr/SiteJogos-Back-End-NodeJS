@@ -9,6 +9,7 @@ import rankingRoutes from "./src/routes/rankingRoute";
 import matchesRoutes from "./src/routes/matchRoute";
 import userRoutes from "./src/routes/userRoute";
 import recordRoutes from "./src/routes/recordRoute";
+import gameRoute from "./src/routes/gameRout";
 
 const port = 8080;
 const app: Express = express();
@@ -24,6 +25,7 @@ app.use(rankingRoutes);
 app.use(matchesRoutes);
 app.use(userRoutes);
 app.use(recordRoutes);
+app.use(gameRoute);
 
 app.listen(port, () => {
   console.log(`Servidor iniciado na porta ${port}!`);
