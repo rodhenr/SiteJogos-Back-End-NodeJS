@@ -22,3 +22,4 @@ export const startNewGame = async (
 
   return newGame;
 };
+
