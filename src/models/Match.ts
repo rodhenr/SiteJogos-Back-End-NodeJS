@@ -5,6 +5,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
     static associate(models: any) {
       Match.belongsTo(models.User, { foreignKey: "userID" });
       Match.belongsTo(models.Game, { foreignKey: "gameID" });
+      Match.hasOne(models.Match_TicTacToe, { foreignKey: "matchID" });
     }
   }
 
@@ -29,6 +30,6 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       timestamps: false,
     }
   );
-  
+
   return Match;
 };

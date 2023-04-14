@@ -1,7 +1,11 @@
 import { Model, Sequelize } from "sequelize";
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class Match_TicTacToe extends Model {}
+  class Match_TicTacToe extends Model {
+    static associate(models: any) {
+      Match_TicTacToe.belongsTo(models.Match, { foreignKey: "matchID" });
+    }
+  }
 
   Match_TicTacToe.init(
     {
@@ -13,11 +17,6 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       },
       matchID: {
         allowNull: false,
-        references: {
-          model: "Matches",
-          key: "id",
-        },
-        onDelete: "CASCADE",
         type: DataTypes.INTEGER,
       },
       isUserMove: {

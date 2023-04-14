@@ -12,14 +12,23 @@ export const startNewGame = async (
 
   if (!isGameExist) throw Error(`This game doesn't exist. Try again later.`);
 
-  const newGame = await db.Match.create({
-    userID,
-    gameID,
-    date,
-    is_win: false,
-    is_processed: false,
-  });
+  const newMatch = await db.Match.create(
+    {
+      userID,
+      gameID,
+      date,
+      is_win: false,
+      is_processed: false,
+    },
+    { raw: true }
+  );
 
-  return newGame;
+  if (isGameExist.name === "TicTacToe") {
+    await db.Match_TicTacToe.create({
+      matchID: newMatch.dataValues.id,
+      isUserMove: true,
+    });
+  }
+
+  return newMatch;
 };
-

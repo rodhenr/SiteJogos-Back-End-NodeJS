@@ -14,13 +14,14 @@ module.exports = {
         allowNull: false,
         references: {
           model: "Matches",
-          key: "id",
+          key: "ID",
         },
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
       isUserMove: {
         allowNull: false,
+        initialValue: true,
         type: Sequelize.BOOLEAN,
       },
       isUserCell_1: {
