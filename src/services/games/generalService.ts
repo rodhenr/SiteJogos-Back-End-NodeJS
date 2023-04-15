@@ -31,4 +31,10 @@ export const startNewGame = async (
   return newMatch;
 };
 
-export const processGameResult = async (matchID: number) => {};
+export const processGameResult = async (matchID: number, result: string) => {
+  return true;
+  //Verificar se foi vitória, derrota ou empate do usuário
+  //Consultar a tabela Games para saber a XP
+  //Conceder a xp para o usuário
+  //Em Match passar is_processed para 1
+};

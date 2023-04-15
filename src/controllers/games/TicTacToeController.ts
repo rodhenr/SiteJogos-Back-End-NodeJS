@@ -56,7 +56,6 @@ export const playerMove = async (req: Request | any, res: Response) => {
     });
 
     const doPlayerMovement = await playerMovement(
-      Number(userInfo.id),
       Number(matchID),
       Number(squarePosition)
     );

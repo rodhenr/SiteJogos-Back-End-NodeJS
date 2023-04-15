@@ -98,8 +98,7 @@ export interface IMatchTicTacToeIncluded {
   date: Date;
   userID: number;
   gameID: number;
-  is_win: boolean;
-  is_processed: boolean;
+  MatchProcessingHistoryID: number;
   "Match_TicTacToe.id": number;
   "Match_TicTacToe.matchID": number;
   "Match_TicTacToe.isUserMove": boolean;

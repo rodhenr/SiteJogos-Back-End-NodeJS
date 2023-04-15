@@ -6,7 +6,6 @@ import db from "../../models";
 import { processGameResult } from "./generalService";
 
 export const playerMovement = async (
-  userID: number,
   matchID: number,
   squarePosition: number
 ) => {
@@ -18,24 +17,10 @@ export const playerMovement = async (
 
   if (!match) throw new Error("Partida não encontrada.");
 
-  if (match.is_win !== null) {
-    if (match.is_processed) {
-      return {
-        message: "Partida já encerrada.",
-        isGameOver: true,
-        isUserWin: match.is_win,
-      };
-    } else {
-      await processGameResult(matchID);
-      return {
-        message: "Partida já encerrada.",
-        isGameOver: true,
-        isUserWin: match.is_win,
-      };
-    }
-  }
+  if (match.MatchProcessingHistoryID !== null)
+    throw new Error("Partida já encerrada.");
 
-  const checkResult = await checkGameOver(matchID);
+  const checkResult = await checkGameOver(match);
 
   if (checkResult.isGameOver) {
     return {
@@ -45,7 +30,10 @@ export const playerMovement = async (
     };
   }
 
-  !match["Match_TicTacToe.isUserMove"] && (await cpuMovement(matchID));
+  const cpuMove =
+    !match["Match_TicTacToe.isUserMove"] && (await cpuMovement(matchID));
+
+  if (cpuMove && cpuMove.isGameOver) throw new Error("Partida já encerrada.");
 
   let cellNameWithRelation =
     `Match_TicTacToe.isUserCell_${squarePosition}` as keyof IMatchTicTacToeIncluded;
@@ -67,7 +55,7 @@ export const playerMovement = async (
     { where: { matchID: matchID } }
   );
 
-  const isGameOver = await checkGameOver(matchID);
+  const isGameOver = await checkGameOver(match);
 
   return {
     message: "Jogada efetuada.",
@@ -99,16 +87,30 @@ export const cpuMovement = async (matchID: number) => {
     );
   }
 
-  return;
-};
-
-const checkGameOver = async (matchID: number) => {
-  const match: IMatchTicTacToeIncluded = await db.Match.findOne({
+  const matchCPU: IMatchTicTacToeIncluded = await db.Match.findOne({
     include: [{ model: db.Match_TicTacToe }],
     where: { id: matchID },
     raw: true,
   });
 
+  const checkResultCPU = await checkGameOver(matchCPU);
+
+  if (checkResultCPU.isGameOver) {
+    return {
+      message: "Partida já encerrada.",
+      isGameOver: true,
+      isUserWin: checkResultCPU.isUserWin,
+    };
+  }
+
+  return {
+    message: null,
+    isGameOver: false,
+    isUserWin: null,
+  };
+};
+
+const checkGameOver = async (match: IMatchTicTacToeIncluded) => {
   const possibleWaysToWin: { [key: string]: boolean | null }[] = [
     {
       cell1: match["Match_TicTacToe.isUserCell_1"],
@@ -153,17 +155,18 @@ const checkGameOver = async (matchID: number) => {
   ];
 
   const checkUserWin = possibleWaysToWin.some((item) => {
-    const values = Object.values(item);
-    const checkResult = values.every((value) => value);
-
-    return checkResult;
+    return item.cell1 && item.cell2 && item.cell3;
   });
 
   const checkCPUWin = possibleWaysToWin.some((item) => {
-    const values = Object.values(item);
-    const checkResult = values.every((value) => value === false);
-
-    return checkResult;
+    return (
+      item.cell1 !== null &&
+      !item.cell1 &&
+      item.cell2 !== null &&
+      !item.cell2 &&
+      item.cell3 !== null &&
+      !item.cell3
+    );
   });
 
   const checkDraw = Object.keys(match).filter((key) => {
@@ -174,15 +177,38 @@ const checkGameOver = async (matchID: number) => {
   });
 
   if (checkUserWin) {
-    await db.Match.update({ is_win: true }, { where: { id: matchID } });
+    const matchProcessedID = await processGameResult(match.id, "win");
+    console.log(matchProcessedID);
+
+    if (!matchProcessedID) throw new Error("Erro ao processar patida.");
+
+    await db.Match.update(
+      { matchProcessingHistoryID: matchProcessedID },
+      { where: { id: match.id } }
+    );
+
     return { isGameOver: true, isUserWin: true };
   } else if (checkCPUWin) {
-    await db.Match.update({ is_win: false }, { where: { id: matchID } });
+    const matchProcessedID = await processGameResult(match.id, "lose");
+
+    if (!matchProcessedID) throw new Error("Erro ao processar patida.");
+
+    await db.Match.update(
+      { matchProcessingHistoryID: matchProcessedID },
+      { where: { id: match.id } }
+    );
     return { isGameOver: true, isUserWin: true };
   } else if (checkDraw.length === 0) {
-    await db.Match.update({ is_win: false }, { where: { id: matchID } });
+    const matchProcessedID = await processGameResult(match.id, "draw");
+
+    if (!matchProcessedID) throw new Error("Erro ao processar patida.");
+
+    await db.Match.update(
+      { matchProcessingHistoryID: matchProcessedID },
+      { where: { id: match.id } }
+    );
     return { isGameOver: true, isUserWin: 0 };
-  } else {
-    return { isGameOver: false, isUserWin: null };
   }
+
+  return { isGameOver: false, isUserWin: null };
 };
