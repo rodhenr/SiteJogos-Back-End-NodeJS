@@ -1,11 +1,16 @@
+import {
+  IMatchTicTacToe,
+  IMatchTicTacToeIncluded,
+} from "../../interfaces/InfoInterface";
 import db from "../../models";
+import { processGameResult } from "./generalService";
 
 export const playerMovement = async (
   userID: number,
   matchID: number,
   squarePosition: number
 ) => {
-  const match = await db.Match.findOne({
+  const match: IMatchTicTacToeIncluded = await db.Match.findOne({
     include: [{ model: db.Match_TicTacToe }],
     where: { id: matchID },
     raw: true,
@@ -13,39 +18,96 @@ export const playerMovement = async (
 
   if (!match) throw new Error("Partida não encontrada.");
 
-  if (match.is_win || match.is_processed)
-    return { message: "Partida já encerrada.", isGameOver: false };
+  if (match.is_win !== null) {
+    if (match.is_processed) {
+      return {
+        message: "Partida já encerrada.",
+        isGameOver: true,
+        isUserWin: match.is_win,
+      };
+    } else {
+      await processGameResult(matchID);
+      return {
+        message: "Partida já encerrada.",
+        isGameOver: true,
+        isUserWin: match.is_win,
+      };
+    }
+  }
 
-  if (!match["Match_TicTacToe.isUserMove"])
-    return { message: "Não é a vez do usuário jogar.", isGameOver: false };
+  const checkResult = await checkGameOver(matchID);
 
-  const cellPosition = `Match_TicTacToe.isUserCell_${squarePosition}`;
+  if (checkResult.isGameOver) {
+    return {
+      message: "Partida já encerrada.",
+      isGameOver: true,
+      isUserWin: checkResult.isUserWin,
+    };
+  }
 
-  if (match[cellPosition] !== null)
-    return { message: "Posição de jogada inválida.", isGameOver: false };
+  !match["Match_TicTacToe.isUserMove"] && (await cpuMovement(matchID));
 
-  const update = {
-    [`isUserCell_${squarePosition}`]: 1,
-    isUserMove: false,
-  };
+  let cellNameWithRelation =
+    `Match_TicTacToe.isUserCell_${squarePosition}` as keyof IMatchTicTacToeIncluded;
 
-  await db.Match_TicTacToe.update(update, { where: { matchID: matchID } });
+  if (
+    !Object.keys(match).includes(cellNameWithRelation) ||
+    match[cellNameWithRelation] !== null
+  )
+    return {
+      message: "Posição de jogada inválida.",
+      isGameOver: false,
+      isUserWin: null,
+    };
+
+  const cellPosition = `isUserCell_${squarePosition}` as keyof IMatchTicTacToe;
+
+  await db.Match_TicTacToe.update(
+    { [cellPosition]: 1, isUserMove: false },
+    { where: { matchID: matchID } }
+  );
 
   const isGameOver = await checkGameOver(matchID);
 
-  return { message: "Jogada efetuada.", isGameOver: isGameOver };
+  return {
+    message: "Jogada efetuada.",
+    isGameOver: isGameOver.isGameOver,
+    isUserWin: isGameOver.isUserWin,
+  };
+};
+
+export const cpuMovement = async (matchID: number) => {
+  const match = await db.Match_TicTacToe.findOne({
+    where: { matchID },
+    raw: true,
+  });
+
+  if (match.isUserMove) return;
+
+  const possibleMoves = Object.keys(match).filter((key) => {
+    return key.startsWith("isUserCell") && match[key] === null;
+  });
+
+  //Melhorar as escolhas tornariam a partida injusta?
+  if (possibleMoves.length > 0) {
+    const randomCol = Math.floor(Math.random() * possibleMoves.length);
+    const choosedItem = possibleMoves[randomCol];
+
+    await db.Match_TicTacToe.update(
+      { [choosedItem]: 0 },
+      { where: { matchID } }
+    );
+  }
+
+  return;
 };
 
 const checkGameOver = async (matchID: number) => {
-  const match = await db.Match.findOne({
+  const match: IMatchTicTacToeIncluded = await db.Match.findOne({
     include: [{ model: db.Match_TicTacToe }],
     where: { id: matchID },
     raw: true,
   });
-
-  if (!match) throw Error("Partida não encontrada.");
-
-  if (match.is_win || match.is_processed) return true;
 
   const possibleWaysToWin: { [key: string]: boolean | null }[] = [
     {
@@ -90,21 +152,37 @@ const checkGameOver = async (matchID: number) => {
     },
   ];
 
-  const checkWin = possibleWaysToWin.some((item) => {
+  const checkUserWin = possibleWaysToWin.some((item) => {
     const values = Object.values(item);
+    const checkResult = values.every((value) => value);
 
-    const allTrue = values.every((value) => value);
-    const allFalse = values.every((value) => value === false);
-
-    if (allTrue || allFalse) return true;
-
-    return false;
+    return checkResult;
   });
 
-  if (checkWin) {
+  const checkCPUWin = possibleWaysToWin.some((item) => {
+    const values = Object.values(item);
+    const checkResult = values.every((value) => value === false);
+
+    return checkResult;
+  });
+
+  const checkDraw = Object.keys(match).filter((key) => {
+    return (
+      key.startsWith("Match_TicTacToe.isUserCell") &&
+      match[key as keyof IMatchTicTacToeIncluded] === null
+    );
+  });
+
+  if (checkUserWin) {
     await db.Match.update({ is_win: true }, { where: { id: matchID } });
-    return true;
+    return { isGameOver: true, isUserWin: true };
+  } else if (checkCPUWin) {
+    await db.Match.update({ is_win: false }, { where: { id: matchID } });
+    return { isGameOver: true, isUserWin: true };
+  } else if (checkDraw.length === 0) {
+    await db.Match.update({ is_win: false }, { where: { id: matchID } });
+    return { isGameOver: true, isUserWin: 0 };
   } else {
-    return false;
+    return { isGameOver: false, isUserWin: null };
   }
 };

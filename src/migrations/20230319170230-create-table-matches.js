@@ -28,8 +28,8 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       date: { allowNull: false, type: Sequelize.DATEONLY },
-      is_win: { allowNull: false, type: Sequelize.BOOLEAN },
-      is_processed: { allowNull: false, type: Sequelize.BOOLEAN },
+      is_win: { type: Sequelize.BOOLEAN, defaultValue: null },
+      is_processed: { type: Sequelize.BOOLEAN, defaultValue: null },
     });
   },
   async down(queryInterface, Sequelize) {

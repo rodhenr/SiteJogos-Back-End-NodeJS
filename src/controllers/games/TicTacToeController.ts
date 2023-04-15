@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { startNewGame } from "../../services/games/generalService";
 import db from "../../models";
 import { playerMovement } from "../../services/games/TicTacToeService";
+import { IUser } from "../../interfaces/InfoInterface";
 
 export const newTicTacToeGame = async (req: Request | any, res: Response) => {
   const { gameID } = req.body;
@@ -37,31 +38,30 @@ export const newTicTacToeGame = async (req: Request | any, res: Response) => {
 export const playerMove = async (req: Request | any, res: Response) => {
   const { matchID, squarePosition } = req.body;
 
-  if (!matchID || !squarePosition)
+  if (
+    !matchID ||
+    !squarePosition ||
+    !["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(squarePosition)
+  )
     return res
       .status(400)
       .json({ message: "Parâmetro(s) de entrada inválido(s)." });
 
   try {
-    const user = req.user;
+    const user: string = req.user;
 
-    const userInfo = await db.User.findOne({
+    const userInfo: IUser = await db.User.findOne({
       where: { user: user },
       raw: true,
     });
 
-    const doPlayerMove = await playerMovement(
+    const doPlayerMovement = await playerMovement(
       Number(userInfo.id),
       Number(matchID),
       Number(squarePosition)
     );
 
-    console.log(doPlayerMove);
-
-    if (doPlayerMove.isGameOver)
-      return res.status(200).json({ message: doPlayerMove.message });
-
-    return res.status(200).json({ message: doPlayerMove.message });
+    return res.status(200).json({ message: doPlayerMovement.message });
   } catch (err) {
     console.log(err);
     return res.status(500).json({

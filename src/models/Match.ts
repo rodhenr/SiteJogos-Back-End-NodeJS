@@ -20,8 +20,8 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       userID: { allowNull: false, type: DataTypes.INTEGER },
       gameID: { allowNull: false, type: DataTypes.INTEGER },
       date: { allowNull: false, type: DataTypes.DATEONLY },
-      is_win: { allowNull: false, type: DataTypes.BOOLEAN },
-      is_processed: { allowNull: false, type: DataTypes.BOOLEAN },
+      is_win: { type: DataTypes.BOOLEAN, defaultValue: null },
+      is_processed: { type: DataTypes.BOOLEAN, defaultValue: null },
     },
     {
       sequelize,
