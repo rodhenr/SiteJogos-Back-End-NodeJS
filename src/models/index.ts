@@ -2,11 +2,14 @@ import * as fs from "fs";
 import * as path from "path";
 import { Sequelize, DataTypes } from "sequelize";
 import process from "process";
+import { ISequelizeDB } from "../interfaces/InfoInterface";
+
+type PartialDB = Partial<ISequelizeDB>;
 
 const basename: string = path.basename(__filename);
 const env: string = process.env.NODE_ENV || "development";
 const config: any = require(__dirname + "/../config/sequelize.js")[env];
-const db: any = {};
+const db: PartialDB = {};
 
 let sequelize: Sequelize = new Sequelize(
   config.database,

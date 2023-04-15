@@ -6,7 +6,7 @@ import { IUser } from "../../interfaces/InfoInterface";
 
 export const newTicTacToeGame = async (req: Request | any, res: Response) => {
   const { gameID } = req.body;
-  const dateNow = new Date();
+  const date = new Date();
 
   if (!gameID)
     return res
@@ -14,9 +14,9 @@ export const newTicTacToeGame = async (req: Request | any, res: Response) => {
       .json({ message: "Parâmetro(s) de entrada inválido(s)." });
 
   try {
-    const user = req.user;
+    const user: string = req.user;
 
-    const userInfo = await db.User.findOne({
+    const userInfo: IUser = await db.User.findOne({
       where: { user: user },
       raw: true,
     });
@@ -24,11 +24,16 @@ export const newTicTacToeGame = async (req: Request | any, res: Response) => {
     if (!userInfo)
       return res.status(401).json({ message: "Usuário não encontrado." });
 
-    const newGame = await startNewGame(userInfo.id, Number(gameID), dateNow);
+    const newGame = await startNewGame(userInfo.id, Number(gameID), date);
 
     return res.status(200).json({ matchID: newGame.id });
   } catch (err: any) {
-    console.log(err);
+    if (err?.statusCode) {
+      return res.status(err.statusCode).json({
+        message: err.message,
+      });
+    }
+
     return res.status(500).json({
       message: "Ocorreu um erro no servidor. Tente novamente mais tarde.",
     });
@@ -55,14 +60,20 @@ export const playerMove = async (req: Request | any, res: Response) => {
       raw: true,
     });
 
+    if (!user) res.status(401).json({ message: "Usuário inválido." });
+
     const doPlayerMovement = await playerMovement(
       Number(matchID),
       Number(squarePosition)
     );
 
     return res.status(200).json({ message: doPlayerMovement.message });
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    if (err?.statusCode) {
+      return res.status(err.statusCode).json({
+        message: err.message,
+      });
+    }
     return res.status(500).json({
       message: "Ocorreu um erro no servidor. Tente novamente mais tarde.",
     });

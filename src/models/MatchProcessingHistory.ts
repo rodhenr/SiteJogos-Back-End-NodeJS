@@ -5,7 +5,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
     static associate(models: any) {
       MatchProcessingHistory.hasOne(models.Match, { foreignKey: "id" });
       MatchProcessingHistory.hasOne(models.Config_MatchResult, {
-        foreignKey: "matchResultID",
+        foreignKey: "id",
       });
     }
   }

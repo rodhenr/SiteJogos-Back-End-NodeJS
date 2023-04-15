@@ -7,7 +7,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       Match.belongsTo(models.Game, { foreignKey: "gameID" });
       Match.hasOne(models.Match_TicTacToe, { foreignKey: "matchID" });
       Match.hasOne(models.MatchProcessingHistory, {
-        foreignKey: "MatchProcessingHistoryID",
+        foreignKey: "id",
       });
     }
   }
@@ -23,7 +23,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       userID: { allowNull: false, type: DataTypes.INTEGER },
       gameID: { allowNull: false, type: DataTypes.INTEGER },
       date: { allowNull: false, type: DataTypes.DATEONLY },
-      MatchProcessingHistoryID: { defaultValue: null, type: DataTypes.INTEGER },
+      matchProcessingHistoryID: { defaultValue: null, type: DataTypes.INTEGER },
     },
     {
       sequelize,

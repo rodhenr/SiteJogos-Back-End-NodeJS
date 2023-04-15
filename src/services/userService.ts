@@ -1,6 +1,6 @@
 import {
   IExperience,
-  IMatch,
+  IMatchProfile,
   IUser,
   IUserSafe,
   IGameStats,
@@ -115,7 +115,7 @@ export const findUserLevelWithRanking = async (id: number) => {
 };
 
 export const findUserStatistics = async (id: number) => {
-  const userMatches: IMatch[] = await db.Match.findAll({
+  const userMatches: IMatchProfile[] = await db.Match.findAll({
     attributes: {
       exclude: ["userID", "gameID", "isProcessed"],
     },

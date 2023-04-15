@@ -21,6 +21,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       },
       isUserMove: {
         allowNull: false,
+        defaultValue: true,
         type: DataTypes.BOOLEAN,
       },
       isUserCell_1: {

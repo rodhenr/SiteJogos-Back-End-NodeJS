@@ -1,3 +1,11 @@
+import { Sequelize } from "sequelize";
+
+export interface ISequelizeDB {
+  sequelize: Sequelize;
+  Sequelize: any;
+  [key: string]: any;
+}
+
 export interface IUser {
   id: number;
   name: string;
@@ -5,6 +13,14 @@ export interface IUser {
   password: string;
   experience: number;
   avatar: "";
+}
+
+export interface IGame {
+  id: number;
+  name: string;
+  win_points: number;
+  draw_points: number;
+  lose_points: number;
 }
 
 export interface IUserSafe {
@@ -22,6 +38,18 @@ export interface IExperience {
 }
 
 export interface IMatch {
+  id: number;
+  userID: number;
+  gameID: number;
+  date: Date;
+  matchProcessingHistoryID: number;
+}
+
+export interface ICreateMatch {
+  dataValues: IMatch;
+}
+
+export interface IMatchProfile {
   id: number;
   date: Date;
   is_win: boolean;
@@ -98,7 +126,7 @@ export interface IMatchTicTacToeIncluded {
   date: Date;
   userID: number;
   gameID: number;
-  MatchProcessingHistoryID: number;
+  matchProcessingHistoryID: number;
   "Match_TicTacToe.id": number;
   "Match_TicTacToe.matchID": number;
   "Match_TicTacToe.isUserMove": boolean;
@@ -126,4 +154,22 @@ export interface IMatchTicTacToe {
   isUserCell_7: boolean;
   isUserCell_8: boolean;
   isUserCell_9: boolean;
+}
+
+export interface IMatchProcessingHistory {
+  id: number;
+  matchID: number;
+  date: Date;
+  matchResultID: boolean;
+}
+
+export interface IConfig_MatchResult {
+  id: number;
+  matchResult: string;
+}
+
+export interface IPossiblePoints {
+  lose_points: number;
+  win_points: number;
+  draw_points: number;
 }
