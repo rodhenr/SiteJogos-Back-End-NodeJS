@@ -1,7 +1,8 @@
 import { Model, Sequelize } from "sequelize";
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class Config_MatchResult extends Model {}
+  class Config_MatchResult extends Model {
+  }
 
   Config_MatchResult.init(
     {

@@ -9,6 +9,9 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       Match.hasOne(models.MatchProcessingHistory, {
         foreignKey: "id",
       });
+      Match.belongsTo(models.MatchProcessingHistory, {
+        foreignKey: "matchProcessingHistoryID",
+      });
     }
   }
 

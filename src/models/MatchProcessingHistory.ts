@@ -3,9 +3,13 @@ import { Model, Sequelize } from "sequelize";
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
   class MatchProcessingHistory extends Model {
     static associate(models: any) {
+      MatchProcessingHistory.belongsTo(models.Config_MatchResult, {
+        foreignKey: "matchResultID",
+        targetKey: "id",
+      });
       MatchProcessingHistory.hasOne(models.Match, { foreignKey: "id" });
-      MatchProcessingHistory.hasOne(models.Config_MatchResult, {
-        foreignKey: "id",
+      MatchProcessingHistory.belongsTo(models.Match, {
+        foreignKey: "matchID",
       });
     }
   }

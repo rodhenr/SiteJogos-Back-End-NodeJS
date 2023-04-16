@@ -60,7 +60,7 @@ export const playerMove = async (req: Request | any, res: Response) => {
       raw: true,
     });
 
-    if (!user) res.status(401).json({ message: "Usuário inválido." });
+    if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     const doPlayerMovement = await playerMovement(
       Number(matchID),

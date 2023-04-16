@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 
 import jwt from "jsonwebtoken";
+import { createErrorObject } from "../services/games/generalService";
 
 const verifyJWT = (req: Request | any, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader)
       return res.status(401).json({ message: "Nenhum token encontrado" });
-      
+
     if (!authHeader.startsWith("Bearer "))
       return res.status(401).json({ message: "Nenhum token encontrado" });
     const token = authHeader.split(" ")[1];
@@ -22,7 +23,10 @@ const verifyJWT = (req: Request | any, res: Response, next: NextFunction) => {
       next();
     });
   } catch (err) {
-    throw new Error("Can't authenticate JWT Token");
+    throw createErrorObject(
+      "Ocorreu um problema na autenticação do token.",
+      500
+    );
   }
 };
 

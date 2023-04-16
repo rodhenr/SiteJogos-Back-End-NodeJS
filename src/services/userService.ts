@@ -1,6 +1,7 @@
 import {
   IExperience,
-  IMatchProfile,
+  IRecentMatches,
+  IUserMatches,
   IUser,
   IUserSafe,
   IGameStats,
@@ -8,6 +9,7 @@ import {
 } from "../interfaces/InfoInterface";
 
 import db from "../models";
+import { createErrorObject } from "./games/generalService";
 
 export const findOneUser = async (user: string) => {
   const data: IUser | null = await db.User.findOne({
@@ -48,9 +50,7 @@ export const findUserLevel = (
     .at(-1);
 
   if (!level)
-    throw Error(
-      "Algo de errado aconteceu na sua requisição. Contate o suporte técnico."
-    );
+    throw createErrorObject("Tabela de experiência não encontrada.", 500);
 
   const nextLevel = experienceList
     .filter((lvl) => {
@@ -59,8 +59,9 @@ export const findUserLevel = (
     .at(-1);
 
   if (!nextLevel)
-    throw Error(
-      "Algo de errado aconteceu na sua requisição. Contate o suporte técnico."
+    throw createErrorObject(
+      "Não foi possível determinar os níveis de experiência.",
+      500
     );
 
   return {
@@ -100,7 +101,7 @@ export const usersDataOrdered = async (userInfo: IUserSafe[]) => {
 };
 
 export const findUserLevelWithRanking = async (id: number) => {
-  const usersData = await db.User.findAll({
+  const usersData: IUserSafe[] = await db.User.findAll({
     attributes: { exclude: ["password"] },
     raw: true,
   });
@@ -109,17 +110,23 @@ export const findUserLevelWithRanking = async (id: number) => {
   const userData = dataOrdered.filter((user) => user.id === id);
 
   if (!userData || userData.length === 0)
-    throw Error("Dados não localizados para o usuário.");
+    throw createErrorObject("Dados não encontrados para o usuário.", 401);
 
   return userData[0];
 };
 
 export const findUserStatistics = async (id: number) => {
-  const userMatches: IMatchProfile[] = await db.Match.findAll({
+  const userMatches: IUserMatches[] = await db.Match.findAll({
     attributes: {
-      exclude: ["userID", "gameID", "isProcessed"],
+      exclude: ["userID", "gameID"],
     },
-    include: [{ attributes: ["name"], model: db.Game }],
+    include: [
+      { model: db.Game, attributes: ["name"] },
+      {
+        model: db.MatchProcessingHistory,
+        include: [{ model: db.Config_MatchResult }],
+      },
+    ],
     raw: true,
     where: { userID: id },
   });
@@ -132,14 +139,27 @@ export const findUserStatistics = async (id: number) => {
         return statistic.game === match["Game.name"];
       });
 
+      const isDraw =
+        match["MatchProcessingHistory.Config_MatchResult.matchResult"] ===
+        "draw";
+      const isWin =
+        match["MatchProcessingHistory.Config_MatchResult.matchResult"] ===
+        "win";
+      const isLose =
+        match["MatchProcessingHistory.Config_MatchResult.matchResult"] ===
+        "lose";
+
       if (gameIndex === -1) {
         statistics.push({
           game: match["Game.name"],
-          wins: Number(match.is_win),
-          loses: Number(!match.is_win),
+          wins: Number(isWin),
+          loses: Number(isLose),
+          draws: Number(isDraw),
         });
       } else {
-        if (match.is_win) {
+        if (isDraw) {
+          statistics[gameIndex].draws++;
+        } else if (isWin) {
           statistics[gameIndex].wins++;
         } else {
           statistics[gameIndex].loses++;
@@ -169,7 +189,7 @@ export const findUserFriends = async (id: number) => {
 export const getUserBasicInfo = async (user: string) => {
   const userData = await findOneUser(user);
 
-  if (!userData) throw Error("Usuário não encontrado.");
+  if (!userData) throw createErrorObject("Usuário não encontrado.", 401);
 
   const experienceList: IExperience[] = await db.Experience.findAll({
     raw: true,
@@ -181,7 +201,7 @@ export const getUserBasicInfo = async (user: string) => {
 export const getUserCompleteInfo = async (user: string) => {
   const userData = await findOneUser(user);
 
-  if (!userData) throw Error("Usuário não encontrado.");
+  if (!userData) throw createErrorObject("Usuário não encontrado.", 401);
 
   const userDataWithLevelAndRanking = await findUserLevelWithRanking(
     userData.id

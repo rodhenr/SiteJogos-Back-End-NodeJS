@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { IJWTDecoded } from "../interfaces/InfoInterface";
 
 import db from "../models";
+import { createErrorObject } from "./games/generalService";
 
 export const isUserRegistered = async (user: string) => {
   const userData = await db.User.findOne({
@@ -27,7 +28,7 @@ export const createNewUser = async (
 
 export const createTokens = (name: string, user: string) => {
   if (!process.env.jwt_secret || !process.env.jwt_secret_refresh)
-    throw Error("Variáveis de ambiente não configuradas.");
+    throw createErrorObject("Configurações do servidor não encontradas.", 500);
 
   const accessToken = jwt.sign({ name, user }, process.env.jwt_secret, {
     expiresIn: 100 * 60,
@@ -46,7 +47,7 @@ export const createTokens = (name: string, user: string) => {
 
 export const verifyRefreshToken = (refreshToken: any) => {
   if (!process.env.jwt_secret || !process.env.jwt_secret_refresh)
-    throw Error("Variáveis de ambiente não configuradas.");
+    throw createErrorObject("Configurações do servidor não encontradas.", 500);
 
   return jwt.verify(refreshToken, process.env.jwt_secret_refresh);
 };

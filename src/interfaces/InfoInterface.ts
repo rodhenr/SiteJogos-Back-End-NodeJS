@@ -49,13 +49,21 @@ export interface ICreateMatch {
   dataValues: IMatch;
 }
 
-export interface IMatchProfile {
+export interface IUserMatches {
   id: number;
   date: Date;
-  is_win: boolean;
   userID: string;
-  "User.name": string;
   "Game.name": string;
+  "MatchProcessingHistory.id": number;
+  "MatchProcessingHistory.matchID": number;
+  "MatchProcessingHistory.date": Date;
+  "MatchProcessingHistory.matchResultID": number;
+  "MatchProcessingHistory.Config_MatchResult.id": number;
+  "MatchProcessingHistory.Config_MatchResult.matchResult": string;
+}
+
+export interface IRecentMatches extends IUserMatches {
+  "User.name": string;
 }
 
 interface IStatistics {
@@ -82,6 +90,7 @@ export interface IGameStats {
   game: string;
   wins: number;
   loses: number;
+  draws: number;
 }
 
 export interface IUserFriends {

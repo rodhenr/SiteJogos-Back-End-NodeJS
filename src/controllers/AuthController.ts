@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 import {
   createNewUser,
   createTokens,
-  isUserRegistered,
   verifyRefreshToken,
 } from "../services/authService";
 
