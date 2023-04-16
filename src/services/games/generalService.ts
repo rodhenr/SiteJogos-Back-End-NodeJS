@@ -83,7 +83,7 @@ export const processGameResult = async (matchID: number, result: string) => {
 
   if (!verifyXP) throw createErrorObject("Jogo não encontrado.", 500);
 
-  const points = verifyXP[`${result}_points` as keyof IPossiblePoints];
+  const points = Number(verifyXP[`${result}_points` as keyof IPossiblePoints]);
 
   const userInfo: IUser = await db.User.findOne({
     where: { id: match.userID },

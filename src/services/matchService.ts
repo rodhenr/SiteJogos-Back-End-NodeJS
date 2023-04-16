@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import {
   IUserMatches,
   IRecentMatches,
@@ -24,6 +25,7 @@ export const getMatchesList = async (limit: number) => {
         ],
       },
     ],
+    where: { matchProcessingHistoryID: { [Op.ne]: null } },
     limit: Number(limit),
     raw: true,
   });
@@ -54,6 +56,7 @@ export const getUserMatchesList = async (user: string, limit: number) => {
     raw: true,
     where: {
       userID: userData.id,
+      matchProcessingHistoryID: { [Op.ne]: null },
     },
   });
 

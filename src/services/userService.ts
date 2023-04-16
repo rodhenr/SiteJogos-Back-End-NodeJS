@@ -92,9 +92,9 @@ export const usersDataOrdered = async (userInfo: IUserSafe[]) => {
   });
 
   const dataOrderedByPosition = dataOrderedByLevel.map((user, index) => {
-    const { experience, ...userData } = user;
+    //const { experience, ...userData } = user;
 
-    return { ...userData, position: index + 1 };
+    return { ...user, position: index + 1 };
   });
 
   return dataOrderedByPosition;
@@ -161,7 +161,7 @@ export const findUserStatistics = async (id: number) => {
           statistics[gameIndex].draws++;
         } else if (isWin) {
           statistics[gameIndex].wins++;
-        } else {
+        } else if (isLose) {
           statistics[gameIndex].loses++;
         }
       }
