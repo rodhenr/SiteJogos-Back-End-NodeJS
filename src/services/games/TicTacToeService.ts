@@ -1,6 +1,7 @@
 import {
   IMatchTicTacToe,
-  IMatchTicTacToeIncluded,
+  IMatchTicTacToeCells,
+  IMatchTicTacToeWithMatch,
 } from "../../interfaces/InfoInterface";
 import db from "../../models";
 import { createErrorObject, processGameResult } from "./generalService";
@@ -9,64 +10,57 @@ export const playerMovement = async (
   matchID: number,
   squarePosition: number
 ) => {
-  const match: IMatchTicTacToeIncluded = await db.Match.findOne({
-    include: [{ model: db.Match_TicTacToe }],
-    where: { id: matchID },
+  const match: IMatchTicTacToeWithMatch = await db.Match_TicTacToe.findOne({
+    include: [{ model: db.Match }],
+    where: { matchID },
     raw: true,
   });
 
   if (!match) throw createErrorObject("Partida não encontrada.", 400);
 
-  if (match.matchProcessingHistoryID !== null)
-    throw createErrorObject("Partida já encerrada.", 400);
-
-  const checkResult = await checkGameOver(match);
-
-  if (checkResult.isGameOver)
-    throw createErrorObject("Partida já encerrada.", 400);
-
-  const cpuMove =
-    !match["Match_TicTacToe.isUserMove"] && (await cpuMovement(matchID));
-
-  if (cpuMove && cpuMove.isGameOver)
-    return {
-      message: "Jogada efetuada.",
-      isGameOver: cpuMove.isGameOver,
-      isUserWin: cpuMove.isUserWin,
-    };
-
-  let cellNameWithRelation =
-    `Match_TicTacToe.isUserCell_${squarePosition}` as keyof IMatchTicTacToeIncluded;
-
-  if (
-    !Object.keys(match).includes(cellNameWithRelation) ||
-    match[cellNameWithRelation] !== null
-  )
-    throw createErrorObject("Posição de jogada inválida.", 400);
+  await earlyMatchResultCheck(match, true);
 
   const cellPosition = `isUserCell_${squarePosition}` as keyof IMatchTicTacToe;
+
+  if (
+    !Object.keys(match).includes(cellPosition) ||
+    match[cellPosition] !== null
+  )
+    throw createErrorObject("Posição de jogada inválida.", 400);
 
   await db.Match_TicTacToe.update(
     { [cellPosition]: 1, isUserMove: false },
     { where: { matchID: matchID } }
   );
 
-  const isGameOver = await checkGameOver(match);
+  const updatedMatch: IMatchTicTacToeCells = await db.Match_TicTacToe.findOne({
+    attributes: { exclude: ["id", "matchID", "isUserMove"] },
+    where: { matchID },
+    raw: true,
+  });
+
+  const isGameOver = await checkGameOver(updatedMatch, matchID);
 
   return {
     message: "Jogada efetuada.",
     isGameOver: isGameOver.isGameOver,
     isUserWin: isGameOver.isUserWin,
+    isPlayerNext: false,
+    cells: updatedMatch,
   };
 };
 
-export const cpuMovement = async (matchID: number) => {
-  const match: IMatchTicTacToe = await db.Match_TicTacToe.findOne({
+export const cpuMovement = async (matchID: number, userID: number) => {
+  const match: IMatchTicTacToeWithMatch = await db.Match_TicTacToe.findOne({
+    include: [{ model: db.Match }],
     where: { matchID },
     raw: true,
   });
 
-  if (match.isUserMove) throw createErrorObject("Não é o turno do CPU.", 400);
+  if (match["Match.userID"] !== userID)
+    throw createErrorObject("Usuário inválido para está partida", 401);
+
+  await earlyMatchResultCheck(match, false);
 
   const possibleMoves = Object.keys(match).filter((key) => {
     return (
@@ -86,70 +80,74 @@ export const cpuMovement = async (matchID: number) => {
     );
   }
 
-  const matchCPU: IMatchTicTacToeIncluded = await db.Match.findOne({
-    include: [{ model: db.Match_TicTacToe }],
-    where: { id: matchID },
+  const matchCells: IMatchTicTacToeCells = await db.Match_TicTacToe.findOne({
+    attributes: { exclude: ["id", "matchID", "isUserMove"] },
+    where: { matchID },
     raw: true,
   });
 
-  const checkResultCPU = await checkGameOver(matchCPU);
+  const checkResultCPU = await checkGameOver(matchCells, matchID);
 
   if (checkResultCPU.isGameOver) {
     return {
-      message: "Jogada efetuada.",
+      message: "Partida finalizada.",
       isGameOver: true,
       isUserWin: checkResultCPU.isUserWin,
+      isPlayerNext: true,
+      matchCells,
     };
   }
 
   return {
-    message: null,
+    message: "Jogada efetuada.",
     isGameOver: false,
     isUserWin: null,
+    isPlayerNext: true,
+    matchCells,
   };
 };
 
-const checkGameOver = async (match: IMatchTicTacToeIncluded) => {
+const checkGameOver = async (cells: IMatchTicTacToeCells, matchID: number) => {
   const possibleWaysToWin: { [key: string]: boolean | null }[] = [
     {
-      cell1: match["Match_TicTacToe.isUserCell_1"],
-      cell2: match["Match_TicTacToe.isUserCell_2"],
-      cell3: match["Match_TicTacToe.isUserCell_3"],
+      cell1: cells["isUserCell_1"],
+      cell2: cells["isUserCell_2"],
+      cell3: cells["isUserCell_3"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_4"],
-      cell2: match["Match_TicTacToe.isUserCell_5"],
-      cell3: match["Match_TicTacToe.isUserCell_6"],
+      cell1: cells["isUserCell_4"],
+      cell2: cells["isUserCell_5"],
+      cell3: cells["isUserCell_6"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_7"],
-      cell2: match["Match_TicTacToe.isUserCell_8"],
-      cell3: match["Match_TicTacToe.isUserCell_9"],
+      cell1: cells["isUserCell_7"],
+      cell2: cells["isUserCell_8"],
+      cell3: cells["isUserCell_9"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_1"],
-      cell2: match["Match_TicTacToe.isUserCell_4"],
-      cell3: match["Match_TicTacToe.isUserCell_7"],
+      cell1: cells["isUserCell_1"],
+      cell2: cells["isUserCell_4"],
+      cell3: cells["isUserCell_7"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_2"],
-      cell2: match["Match_TicTacToe.isUserCell_5"],
-      cell3: match["Match_TicTacToe.isUserCell_8"],
+      cell1: cells["isUserCell_2"],
+      cell2: cells["isUserCell_5"],
+      cell3: cells["isUserCell_8"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_3"],
-      cell2: match["Match_TicTacToe.isUserCell_6"],
-      cell3: match["Match_TicTacToe.isUserCell_9"],
+      cell1: cells["isUserCell_3"],
+      cell2: cells["isUserCell_6"],
+      cell3: cells["isUserCell_9"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_1"],
-      cell2: match["Match_TicTacToe.isUserCell_5"],
-      cell3: match["Match_TicTacToe.isUserCell_9"],
+      cell1: cells["isUserCell_1"],
+      cell2: cells["isUserCell_5"],
+      cell3: cells["isUserCell_9"],
     },
     {
-      cell1: match["Match_TicTacToe.isUserCell_3"],
-      cell2: match["Match_TicTacToe.isUserCell_5"],
-      cell3: match["Match_TicTacToe.isUserCell_7"],
+      cell1: cells["isUserCell_3"],
+      cell2: cells["isUserCell_5"],
+      cell3: cells["isUserCell_7"],
     },
   ];
 
@@ -168,23 +166,51 @@ const checkGameOver = async (match: IMatchTicTacToeIncluded) => {
     );
   });
 
-  const checkDraw = Object.keys(match).filter((key) => {
-    return (
-      key.startsWith("Match_TicTacToe.isUserCell") &&
-      match[key as keyof IMatchTicTacToeIncluded] === null
-    );
+  const checkDraw = possibleWaysToWin.every((item) => {
+    return item.cell1 !== null && item.cell2 !== null && item.cell3 !== null;
   });
 
   if (checkUserWin) {
-    await processGameResult(match.id, "win");
+    await processGameResult(matchID, "win");
     return { isGameOver: true, isUserWin: true };
   } else if (checkCPUWin) {
-    await processGameResult(match.id, "lose");
+    await processGameResult(matchID, "lose");
     return { isGameOver: true, isUserWin: true };
-  } else if (checkDraw.length === 0) {
-    await processGameResult(match.id, "draw");
+  } else if (checkDraw) {
+    await processGameResult(matchID, "draw");
     return { isGameOver: true, isUserWin: 0 };
   }
 
   return { isGameOver: false, isUserWin: null };
+};
+
+const earlyMatchResultCheck = async (
+  match: IMatchTicTacToeWithMatch,
+  isUser: boolean
+) => {
+  if (match["Match.matchProcessingHistoryID"] !== null)
+    throw createErrorObject("Partida já encerrada.", 400);
+
+  if (isUser && !match.isUserMove)
+    throw createErrorObject("Não é o turno do jogador.", 400);
+
+  if (!isUser && match.isUserMove)
+    throw createErrorObject("Não é o turno do CPU.", 400);
+
+  const matchCells = {
+    isUserCell_1: match.isUserCell_1,
+    isUserCell_2: match.isUserCell_2,
+    isUserCell_3: match.isUserCell_3,
+    isUserCell_4: match.isUserCell_4,
+    isUserCell_5: match.isUserCell_5,
+    isUserCell_6: match.isUserCell_6,
+    isUserCell_7: match.isUserCell_7,
+    isUserCell_8: match.isUserCell_8,
+    isUserCell_9: match.isUserCell_9,
+  };
+
+  const checkResult = await checkGameOver(matchCells, match.matchID);
+
+  if (checkResult.isGameOver)
+    throw createErrorObject("Partida já encerrada.", 400);
 };

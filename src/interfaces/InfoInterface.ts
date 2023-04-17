@@ -130,27 +130,12 @@ export interface IMatchesGroup {
   "Game.name": string;
 }
 
-export interface IMatchTicTacToeIncluded {
-  id: number;
-  date: Date;
-  userID: number;
-  gameID: number;
-  matchProcessingHistoryID: number;
-  "Match_TicTacToe.id": number;
-  "Match_TicTacToe.matchID": number;
-  "Match_TicTacToe.isUserMove": boolean;
-  "Match_TicTacToe.isUserCell_1": boolean;
-  "Match_TicTacToe.isUserCell_2": boolean;
-  "Match_TicTacToe.isUserCell_3": boolean;
-  "Match_TicTacToe.isUserCell_4": boolean;
-  "Match_TicTacToe.isUserCell_5": boolean;
-  "Match_TicTacToe.isUserCell_6": boolean;
-  "Match_TicTacToe.isUserCell_7": boolean;
-  "Match_TicTacToe.isUserCell_8": boolean;
-  "Match_TicTacToe.isUserCell_9": boolean;
-}
-
-export interface IMatchTicTacToe {
+export interface IMatchTicTacToeWithMatch {
+  "Match.id": number;
+  "Match.date": Date;
+  "Match.userID": number;
+  "Match.gameID": number;
+  "Match.matchProcessingHistoryID": number;
   id: number;
   matchID: number;
   isUserMove: boolean;
@@ -163,6 +148,24 @@ export interface IMatchTicTacToe {
   isUserCell_7: boolean;
   isUserCell_8: boolean;
   isUserCell_9: boolean;
+}
+
+export interface IMatchTicTacToeCells {
+  isUserCell_1: boolean;
+  isUserCell_2: boolean;
+  isUserCell_3: boolean;
+  isUserCell_4: boolean;
+  isUserCell_5: boolean;
+  isUserCell_6: boolean;
+  isUserCell_7: boolean;
+  isUserCell_8: boolean;
+  isUserCell_9: boolean;
+}
+
+export interface IMatchTicTacToe extends IMatchTicTacToeCells {
+  id: number;
+  matchID: number;
+  isUserMove: boolean;
 }
 
 export interface IMatchProcessingHistory {

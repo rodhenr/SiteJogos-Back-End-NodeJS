@@ -9,7 +9,7 @@ import rankingRoutes from "./src/routes/rankingRoute";
 import matchesRoutes from "./src/routes/matchRoute";
 import userRoutes from "./src/routes/userRoute";
 import recordRoutes from "./src/routes/recordRoute";
-import gameRoute from "./src/routes/gameRout";
+import gameRoute from "./src/routes/gameRoute";
 
 const port = 8080;
 const app: Express = express();
