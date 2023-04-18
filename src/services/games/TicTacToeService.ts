@@ -46,7 +46,7 @@ export const playerMovement = async (
     isGameOver: isGameOver.isGameOver,
     isUserWin: isGameOver.isUserWin,
     isPlayerNext: false,
-    cells: updatedMatch,
+    cells: Object.values(updatedMatch),
   };
 };
 
@@ -94,7 +94,7 @@ export const cpuMovement = async (matchID: number, userID: number) => {
       isGameOver: true,
       isUserWin: checkResultCPU.isUserWin,
       isPlayerNext: true,
-      matchCells,
+      cells: Object.values(matchCells),
     };
   }
 
@@ -103,7 +103,7 @@ export const cpuMovement = async (matchID: number, userID: number) => {
     isGameOver: false,
     isUserWin: null,
     isPlayerNext: true,
-    matchCells,
+    cells: Object.values(matchCells),
   };
 };
 

@@ -5,7 +5,7 @@ import {
   cpuMovement,
   playerMovement,
 } from "../../services/games/TicTacToeService";
-import { IMatch, IUser } from "../../interfaces/InfoInterface";
+import { IUser } from "../../interfaces/InfoInterface";
 
 export const newTicTacToeGame = async (req: Request | any, res: Response) => {
   const { gameID } = req.body;
@@ -31,6 +31,7 @@ export const newTicTacToeGame = async (req: Request | any, res: Response) => {
 
     return res.status(200).json({ matchID: newGame.id });
   } catch (err: any) {
+    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,
@@ -45,11 +46,10 @@ export const newTicTacToeGame = async (req: Request | any, res: Response) => {
 
 export const playerMove = async (req: Request | any, res: Response) => {
   const { matchID, squarePosition } = req.body;
-
   if (
     !matchID ||
     !squarePosition ||
-    !["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(squarePosition)
+    ![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(squarePosition)
   )
     return res
       .status(400)

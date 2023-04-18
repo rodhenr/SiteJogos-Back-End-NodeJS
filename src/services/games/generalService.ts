@@ -93,7 +93,7 @@ export const processGameResult = async (matchID: number, result: string) => {
   if (!userInfo) throw createErrorObject("Usuário não encontrado.", 401);
 
   await db.User.update(
-    { experience: userInfo.experience + points },
+    { experience: Number(userInfo.experience) + points },
     { where: { id: userInfo.id } }
   );
 
