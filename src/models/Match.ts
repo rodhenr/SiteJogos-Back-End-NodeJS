@@ -25,7 +25,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       },
       userID: { allowNull: false, type: DataTypes.INTEGER },
       gameID: { allowNull: false, type: DataTypes.INTEGER },
-      date: { allowNull: false, type: DataTypes.DATEONLY },
+      date: { allowNull: false, type: DataTypes.DATE },
       matchProcessingHistoryID: { defaultValue: null, type: DataTypes.INTEGER },
     },
     {

@@ -44,7 +44,7 @@ export const playerMovement = async (
   return {
     message: "Jogada efetuada.",
     isGameOver: isGameOver.isGameOver,
-    isUserWin: isGameOver.isUserWin,
+    gameResult: isGameOver.result,
     isPlayerNext: false,
     cells: Object.values(updatedMatch),
   };
@@ -92,7 +92,7 @@ export const cpuMovement = async (matchID: number, userID: number) => {
     return {
       message: "Partida finalizada.",
       isGameOver: true,
-      isUserWin: checkResultCPU.isUserWin,
+      gameResult: checkResultCPU.result,
       isPlayerNext: true,
       cells: Object.values(matchCells),
     };
@@ -101,7 +101,7 @@ export const cpuMovement = async (matchID: number, userID: number) => {
   return {
     message: "Jogada efetuada.",
     isGameOver: false,
-    isUserWin: null,
+    gameResult: null,
     isPlayerNext: true,
     cells: Object.values(matchCells),
   };
@@ -151,37 +151,31 @@ const checkGameOver = async (cells: IMatchTicTacToeCells, matchID: number) => {
     },
   ];
 
-  const checkUserWin = possibleWaysToWin.some((item) => {
-    return item.cell1 && item.cell2 && item.cell3;
-  });
+  const checkUserWin = possibleWaysToWin.some(
+    (item) => item.cell1 && item.cell2 && item.cell3
+  );
 
-  const checkCPUWin = possibleWaysToWin.some((item) => {
-    return (
-      item.cell1 !== null &&
-      !item.cell1 &&
-      item.cell2 !== null &&
-      !item.cell2 &&
-      item.cell3 !== null &&
-      !item.cell3
-    );
-  });
+  const checkCPUWin = possibleWaysToWin.some(
+    (item) =>
+      item.cell1 === false && item.cell2 === false && item.cell3 === false
+  );
 
-  const checkDraw = possibleWaysToWin.every((item) => {
-    return item.cell1 !== null && item.cell2 !== null && item.cell3 !== null;
-  });
+  const checkDraw = possibleWaysToWin.every(
+    (item) => item.cell1 !== null && item.cell2 !== null && item.cell3 !== null
+  );
 
   if (checkUserWin) {
     await processGameResult(matchID, "win");
-    return { isGameOver: true, isUserWin: true };
+    return { isGameOver: true, result: "win" };
   } else if (checkCPUWin) {
     await processGameResult(matchID, "lose");
-    return { isGameOver: true, isUserWin: true };
+    return { isGameOver: true, result: "lose" };
   } else if (checkDraw) {
     await processGameResult(matchID, "draw");
-    return { isGameOver: true, isUserWin: 0 };
+    return { isGameOver: true, result: "draw" };
   }
 
-  return { isGameOver: false, isUserWin: null };
+  return { isGameOver: false, result: null };
 };
 
 const earlyMatchResultCheck = async (

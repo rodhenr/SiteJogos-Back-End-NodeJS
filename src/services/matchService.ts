@@ -13,6 +13,7 @@ export const getMatchesList = async (limit: number) => {
     attributes: {
       exclude: ["gameID"],
     },
+    order: [["id", "DESC"]],
     include: [
       { model: db.User, attributes: ["name"] },
       { model: db.Game, attributes: ["name"] },
@@ -45,6 +46,7 @@ export const getUserMatchesList = async (user: string, limit: number) => {
     attributes: {
       exclude: ["userID", "gameID"],
     },
+    order: [["id", "DESC"]],
     include: [
       { model: db.Game, attributes: ["name"] },
       {

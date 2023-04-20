@@ -62,9 +62,7 @@ export const processGameResult = async (matchID: number, result: string) => {
 
   if (!resultTypes) throw createErrorObject("Resultados não encontrados.", 500);
 
-  const resultData = resultTypes.filter((r: any) => {
-    return r.matchResult === result;
-  });
+  const resultData = resultTypes.filter((r) => r.matchResult === result);
 
   if (resultData.length === 0)
     throw createErrorObject("Tipo de resultado informado é inválido.", 400);

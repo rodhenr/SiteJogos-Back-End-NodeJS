@@ -27,7 +27,7 @@ module.exports = {
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
-      date: { allowNull: false, type: Sequelize.DATEONLY },
+      date: { allowNull: false, type: Sequelize.DATE },
       matchProcessingHistoryID: {
         defaultValue: null,
         type: Sequelize.INTEGER,
