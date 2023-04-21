@@ -4,7 +4,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
   class Config_JokenpoResult extends Model {
     static associate(models: any) {
       Config_JokenpoResult.belongsTo(models.Config_JokenpoChoice, {
-        foreignKey: "playerChoiceID",
+        foreignKey: "userChoiceID",
         targetKey: "id",
       });
       Config_JokenpoResult.belongsTo(models.Config_JokenpoChoice, {
@@ -12,7 +12,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         targetKey: "id",
       });
       Config_JokenpoResult.belongsTo(models.Config_Result, {
-        foreignKey: "playerResultID",
+        foreignKey: "userResultID",
         targetKey: "id",
       });
     }
@@ -20,7 +20,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
 
   Config_JokenpoResult.init(
     {
-      playerChoiceID: {
+      userChoiceID: {
         allowNull: false,
         primaryKey: true,
         type: DataTypes.INTEGER,
@@ -30,7 +30,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      playerResultID: {
+      userResultID: {
         allowNull: false,
         type: DataTypes.INTEGER,
       },

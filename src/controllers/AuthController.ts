@@ -20,8 +20,6 @@ const handleRegister = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Usuário registrado com sucesso!" });
   } catch (err) {
-    console.log(err);
-
     res.status(500).json({
       message:
         "Ocorreu um erro na sua requisição. Por favor, contate o suporte técnico.",
@@ -58,8 +56,6 @@ const handleLogin = async (req: Request, res: Response) => {
 
     res.status(200).json({ accessToken, username: userData.name });
   } catch (err: any) {
-    console.log(err);
-
     res.status(500).json({
       message: err?.message
         ? err.mesage

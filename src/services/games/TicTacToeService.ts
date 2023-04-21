@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import {
   IMatchTicTacToe,
   IMatchTicTacToeCells,
@@ -28,26 +29,37 @@ export const playerMovement = async (
   )
     throw createErrorObject("Posição de jogada inválida.", 400);
 
-  await db.Match_TicTacToe.update(
-    { [cellPosition]: 1, isUserMove: false },
-    { where: { matchID: matchID } }
-  );
+  const transaction = await sequelize.transaction();
 
-  const updatedMatch: IMatchTicTacToeCells = await db.Match_TicTacToe.findOne({
-    attributes: { exclude: ["id", "matchID", "isUserMove"] },
-    where: { matchID },
-    raw: true,
-  });
+  try {
+    await db.Match_TicTacToe.update(
+      { [cellPosition]: 1, isUserMove: false },
+      { where: { matchID: matchID } }
+    );
 
-  const isGameOver = await checkGameOver(updatedMatch, matchID);
+    const updatedMatch: IMatchTicTacToeCells = await db.Match_TicTacToe.findOne(
+      {
+        attributes: { exclude: ["id", "matchID", "isUserMove"] },
+        where: { matchID },
+        raw: true,
+      }
+    );
 
-  return {
-    message: "Jogada efetuada.",
-    isGameOver: isGameOver.isGameOver,
-    gameResult: isGameOver.result,
-    isPlayerNext: false,
-    cells: Object.values(updatedMatch),
-  };
+    const isGameOver = await checkGameOver(updatedMatch, matchID, transaction);
+
+    await transaction.commit();
+
+    return {
+      message: "Jogada efetuada.",
+      isGameOver: isGameOver.isGameOver,
+      gameResult: isGameOver.result,
+      isPlayerNext: false,
+      cells: Object.values(updatedMatch),
+    };
+  } catch (err: any) {
+    await transaction.rollback();
+    throw new Error(err);
+  }
 };
 
 export const cpuMovement = async (matchID: number, userID: number) => {
@@ -86,28 +98,45 @@ export const cpuMovement = async (matchID: number, userID: number) => {
     raw: true,
   });
 
-  const checkResultCPU = await checkGameOver(matchCells, matchID);
+  const transaction = await sequelize.transaction();
 
-  if (checkResultCPU.isGameOver) {
+  try {
+    const checkResultCPU = await checkGameOver(
+      matchCells,
+      matchID,
+      transaction
+    );
+
+    await transaction.commit();
+
+    if (checkResultCPU.isGameOver) {
+      return {
+        message: "Partida finalizada.",
+        isGameOver: true,
+        gameResult: checkResultCPU.result,
+        isPlayerNext: true,
+        cells: Object.values(matchCells),
+      };
+    }
+
     return {
-      message: "Partida finalizada.",
-      isGameOver: true,
-      gameResult: checkResultCPU.result,
+      message: "Jogada efetuada.",
+      isGameOver: false,
+      gameResult: null,
       isPlayerNext: true,
       cells: Object.values(matchCells),
     };
+  } catch (err: any) {
+    await transaction.rollback();
+    throw new Error(err);
   }
-
-  return {
-    message: "Jogada efetuada.",
-    isGameOver: false,
-    gameResult: null,
-    isPlayerNext: true,
-    cells: Object.values(matchCells),
-  };
 };
 
-const checkGameOver = async (cells: IMatchTicTacToeCells, matchID: number) => {
+const checkGameOver = async (
+  cells: IMatchTicTacToeCells,
+  matchID: number,
+  transaction: Transaction
+) => {
   const possibleWaysToWin: { [key: string]: boolean | null }[] = [
     {
       cell1: cells["isUserCell_1"],
@@ -165,13 +194,13 @@ const checkGameOver = async (cells: IMatchTicTacToeCells, matchID: number) => {
   );
 
   if (checkUserWin) {
-    await processGameResult(matchID, "win");
+    await processGameResult(matchID, "win", transaction);
     return { isGameOver: true, result: "win" };
   } else if (checkCPUWin) {
-    await processGameResult(matchID, "lose");
+    await processGameResult(matchID, "lose", transaction);
     return { isGameOver: true, result: "lose" };
   } else if (checkDraw) {
-    await processGameResult(matchID, "draw");
+    await processGameResult(matchID, "draw", transaction);
     return { isGameOver: true, result: "draw" };
   }
 
@@ -203,8 +232,21 @@ const earlyMatchResultCheck = async (
     isUserCell_9: match.isUserCell_9,
   };
 
-  const checkResult = await checkGameOver(matchCells, match.matchID);
+  const transaction = await sequelize.transaction();
 
-  if (checkResult.isGameOver)
-    throw createErrorObject("Partida já encerrada.", 400);
+  try {
+    const checkResult = await checkGameOver(
+      matchCells,
+      match.matchID,
+      transaction
+    );
+
+    if (checkResult.isGameOver)
+      throw createErrorObject("Partida já encerrada.", 400);
+
+    await transaction.commit();
+  } catch (err: any) {
+    await transaction.rollback();
+    throw new Error(err);
+  }
 };

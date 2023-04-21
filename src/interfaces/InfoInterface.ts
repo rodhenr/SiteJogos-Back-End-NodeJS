@@ -153,6 +153,31 @@ export interface IMatchTicTacToe extends IMatchTicTacToeCells {
   isUserMove: boolean;
 }
 
+export interface IMatchJokenpoWithMatch {
+  "Match.id": number;
+  "Match.date": Date;
+  "Match.userID": number;
+  "Match.gameID": number;
+  "Match.matchProcessingID": number;
+  id: number;
+  matchID: number;
+  userChoiceID: number;
+  cpuChoiceID: number;
+}
+
+export interface IJokenpoChoice {
+  id: number;
+  choice: string;
+}
+
+export interface IJokenpoResultWithConfigResult {
+  userChoiceID: number;
+  cpuChoiceID: number;
+  resultID: number;
+  "Config_Result.id": number;
+  "Config_Result.result": string;
+}
+
 export interface IMatchProcessing {
   id: number;
   matchID: number;

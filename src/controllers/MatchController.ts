@@ -13,7 +13,6 @@ const getMatches = async (req: Request, res: Response) => {
 
     res.status(200).json(matchList);
   } catch (err: any) {
-    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,

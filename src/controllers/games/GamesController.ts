@@ -30,7 +30,6 @@ export const newMatch = async (req: Request | any, res: Response) => {
 
     return res.status(200).json({ matchID: newGame.id });
   } catch (err: any) {
-    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,

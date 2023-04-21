@@ -4,7 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Config_JokenpoResults", {
-      playerChoiceID: {
+      userChoiceID: {
         allowNull: false,
         primaryKey: true,
         references: {
@@ -24,7 +24,7 @@ module.exports = {
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
-      playerResultID: {
+      userResultID: {
         allowNull: false,
         references: {
           model: "Config_Results",

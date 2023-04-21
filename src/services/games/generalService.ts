@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import {
   IGame,
   IMatchProcessing,
@@ -51,7 +52,11 @@ export const startNewGame = async (
   }
 };
 
-export const processGameResult = async (matchID: number, result: string) => {
+export const processGameResult = async (
+  matchID: number,
+  result: string,
+  transaction: Transaction
+) => {
   const isProcessed: IMatchProcessing = await db.MatchProcessing.findOne({
     where: { matchID },
     raw: true,
@@ -100,32 +105,22 @@ export const processGameResult = async (matchID: number, result: string) => {
 
   if (!userInfo) throw createErrorObject("Usuário não encontrado.", 401);
 
-  const transaction = await sequelize.transaction();
+  await db.User.update(
+    { experience: Number(userInfo.experience) + points },
+    { where: { id: userInfo.id } },
+    transaction
+  );
 
-  try {
-    await db.User.update(
-      { experience: Number(userInfo.experience) + points },
-      { where: { id: userInfo.id } },
-      transaction
-    );
+  const processedData: IMatchProcessing = await db.MatchProcessing.create(
+    { matchID, date: Date.now(), resultID: resultData[0].id },
+    { raw: true, transaction }
+  );
 
-    const processedData: IMatchProcessing = await db.MatchProcessing.create(
-      { matchID, date: Date.now(), resultID: resultData[0].id },
-      { raw: true, transaction }
-    );
-
-    await db.Match.update(
-      { matchProcessingID: processedData.id },
-      { where: { id: matchID } },
-      transaction
-    );
-
-    await transaction.commit();
-    return;
-  } catch (err: any) {
-    await transaction.rollback();
-    throw new Error(err);
-  }
+  await db.Match.update(
+    { matchProcessingID: processedData.id },
+    { where: { id: matchID } },
+    transaction
+  );
 };
 
 export const createErrorObject = (message: string, status: number) => {

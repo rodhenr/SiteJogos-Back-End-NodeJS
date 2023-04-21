@@ -6,13 +6,9 @@ import { IUser } from "../../interfaces/InfoInterface";
 
 import { handlePlayerChoice } from "../../services/games/JokenpoService";
 
-export const playerMove = async (req: Request | any, res: Response) => {
-  const { matchID, playerChoice } = req.body;
-  if (
-    !matchID ||
-    !playerChoice ||
-    !["paper", "scissor", "rock"].includes(playerChoice)
-  )
+export const playerChoice = async (req: Request | any, res: Response) => {
+  const { matchID, choice } = req.body;
+  if (!matchID || !choice || !["paper", "scissors", "rock"].includes(choice))
     return res
       .status(400)
       .json({ message: "Parâmetro(s) de entrada inválido(s)." });
@@ -27,11 +23,10 @@ export const playerMove = async (req: Request | any, res: Response) => {
 
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
-    const gameData = await handlePlayerChoice(Number(matchID), playerChoice);
+    const result = await handlePlayerChoice(Number(matchID), choice);
 
-    return res.status(200).json();
+    return res.status(200).json({ ...result });
   } catch (err: any) {
-    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,
