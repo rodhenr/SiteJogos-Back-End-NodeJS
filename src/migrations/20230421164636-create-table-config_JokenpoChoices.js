@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Config_JokenpoChoice", {
+    await queryInterface.createTable("Config_JokenpoChoices", {
       id: {
         allowNull: false,
         autoIncrement: { type: Sequelize.INTEGER, initialValue: 1 },
@@ -12,12 +12,12 @@ module.exports = {
       },
       choice: {
         allowNull: false,
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING(10),
       },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Config_JokenpoChoice");
+    await queryInterface.dropTable("Config_JokenpoChoices");
   },
 };

@@ -182,7 +182,7 @@ const earlyMatchResultCheck = async (
   match: IMatchTicTacToeWithMatch,
   isUser: boolean
 ) => {
-  if (match["Match.matchProcessingHistoryID"] !== null)
+  if (match["Match.matchProcessingID"] !== null)
     throw createErrorObject("Partida já encerrada.", 400);
 
   if (isUser && !match.isUserMove)

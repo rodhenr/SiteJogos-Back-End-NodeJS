@@ -4,16 +4,16 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
-      "Config_JokenpoChoice",
+      "Config_JokenpoChoices",
       [
+        {
+          choice: "paper",
+        },
         {
           choice: "rock",
         },
         {
-          choice: "scissor",
-        },
-        {
-          choice: "paper",
+          choice: "scissors",
         },
       ],
       {}
@@ -21,6 +21,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Config_JokenpoChoice", null, {});
+    await queryInterface.bulkDelete("Config_JokenpoChoices", null, {});
   },
 };

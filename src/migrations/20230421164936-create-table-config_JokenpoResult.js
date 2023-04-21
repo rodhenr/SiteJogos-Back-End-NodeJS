@@ -1,40 +1,42 @@
 "use strict";
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Matches", {
-      id: {
+    await queryInterface.createTable("Config_JokenpoResults", {
+      playerChoiceID: {
         allowNull: false,
-        autoIncrement: { type: Sequelize.INTEGER, initialValue: 1 },
         primaryKey: true,
-        type: Sequelize.INTEGER,
-      },
-      userID: {
-        allowNull: false,
         references: {
-          model: "Users",
-          key: "id",
+          model: "Config_JokenpoChoices",
+          key: "ID",
         },
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
-      gameID: {
+      cpuChoiceID: {
         allowNull: false,
+        primaryKey: true,
         references: {
-          model: "Games",
-          key: "id",
+          model: "Config_JokenpoChoices",
+          key: "ID",
         },
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
-      date: { allowNull: false, type: Sequelize.DATE },
-      matchProcessingID: {
-        defaultValue: null,
+      playerResultID: {
+        allowNull: false,
+        references: {
+          model: "Config_Results",
+          key: "ID",
+        },
+        onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
     });
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Matches");
+    await queryInterface.dropTable("Config_JokenpoResults");
   },
 };

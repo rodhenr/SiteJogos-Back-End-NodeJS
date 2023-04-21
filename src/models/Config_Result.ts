@@ -1,10 +1,9 @@
 import { Model, Sequelize } from "sequelize";
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class Config_MatchResult extends Model {
-  }
+  class Config_Result extends Model {}
 
-  Config_MatchResult.init(
+  Config_Result.init(
     {
       id: {
         allowNull: false,
@@ -12,18 +11,18 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      matchResult: {
+      result: {
         defaultValue: null,
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING(10),
       },
     },
     {
       sequelize,
-      tableName: "Config_MatchResult",
-      modelName: "Config_MatchResult",
+      tableName: "Config_Results",
+      modelName: "Config_Result",
       timestamps: false,
     }
   );
 
-  return Config_MatchResult;
+  return Config_Result;
 };

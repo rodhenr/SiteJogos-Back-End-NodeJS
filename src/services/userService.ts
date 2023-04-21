@@ -123,8 +123,8 @@ export const findUserStatistics = async (id: number) => {
     include: [
       { model: db.Game, attributes: ["name"] },
       {
-        model: db.MatchProcessingHistory,
-        include: [{ model: db.Config_MatchResult }],
+        model: db.MatchProcessing,
+        include: [{ model: db.Config_Result }],
       },
     ],
     raw: true,
@@ -140,13 +140,13 @@ export const findUserStatistics = async (id: number) => {
       });
 
       const isDraw =
-        match["MatchProcessingHistory.Config_MatchResult.matchResult"] ===
+        match["MatchProcessing.Config_Result.result"] ===
         "draw";
       const isWin =
-        match["MatchProcessingHistory.Config_MatchResult.matchResult"] ===
+        match["MatchProcessing.Config_Result.result"] ===
         "win";
       const isLose =
-        match["MatchProcessingHistory.Config_MatchResult.matchResult"] ===
+        match["MatchProcessing.Config_Result.result"] ===
         "lose";
 
       if (gameIndex === -1) {

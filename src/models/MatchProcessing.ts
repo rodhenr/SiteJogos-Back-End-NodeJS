@@ -1,20 +1,21 @@
 import { Model, Sequelize } from "sequelize";
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class MatchProcessingHistory extends Model {
+  class MatchProcessing extends Model {
     static associate(models: any) {
-      MatchProcessingHistory.belongsTo(models.Config_MatchResult, {
-        foreignKey: "matchResultID",
+      MatchProcessing.belongsTo(models.Config_Result, {
+        foreignKey: "resultID",
         targetKey: "id",
       });
-      MatchProcessingHistory.hasOne(models.Match, { foreignKey: "id" });
-      MatchProcessingHistory.belongsTo(models.Match, {
+      MatchProcessing.hasOne(models.Match, { foreignKey: "id" });
+      MatchProcessing.belongsTo(models.Match, {
         foreignKey: "matchID",
+        targetKey: "id",
       });
     }
   }
 
-  MatchProcessingHistory.init(
+  MatchProcessing.init(
     {
       id: {
         allowNull: false,
@@ -27,18 +28,18 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         type: DataTypes.INTEGER,
       },
       date: { allowNull: false, type: DataTypes.DATEONLY },
-      matchResultID: {
+      resultID: {
         defaultValue: null,
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.INTEGER,
       },
     },
     {
       sequelize,
-      tableName: "MatchProcessingHistory",
-      modelName: "MatchProcessingHistory",
+      tableName: "MatchesProcessing",
+      modelName: "MatchProcessing",
       timestamps: false,
     }
   );
 
-  return MatchProcessingHistory;
+  return MatchProcessing;
 };

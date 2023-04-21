@@ -18,15 +18,15 @@ export const getMatchesList = async (limit: number) => {
       { model: db.User, attributes: ["name"] },
       { model: db.Game, attributes: ["name"] },
       {
-        model: db.MatchProcessingHistory,
+        model: db.MatchProcessing,
         include: [
           {
-            model: db.Config_MatchResult,
+            model: db.Config_Result,
           },
         ],
       },
     ],
-    where: { matchProcessingHistoryID: { [Op.ne]: null } },
+    where: { matchProcessingID: { [Op.ne]: null } },
     limit: Number(limit),
     raw: true,
   });
@@ -50,15 +50,15 @@ export const getUserMatchesList = async (user: string, limit: number) => {
     include: [
       { model: db.Game, attributes: ["name"] },
       {
-        model: db.MatchProcessingHistory,
-        include: [{ model: db.Config_MatchResult }],
+        model: db.MatchProcessing,
+        include: [{ model: db.Config_Result }],
       },
     ],
     limit: Number(limit),
     raw: true,
     where: {
       userID: userData.id,
-      matchProcessingHistoryID: { [Op.ne]: null },
+      matchProcessingID: { [Op.ne]: null },
     },
   });
 

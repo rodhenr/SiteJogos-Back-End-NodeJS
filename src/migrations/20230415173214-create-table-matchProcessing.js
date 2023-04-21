@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("MatchProcessingHistory", {
+    await queryInterface.createTable("MatchesProcessing", {
       id: {
         allowNull: false,
         autoIncrement: { type: Sequelize.INTEGER, initialValue: 1 },
@@ -20,10 +20,10 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       date: { allowNull: false, type: Sequelize.DATEONLY },
-      matchResultID: {
+      resultID: {
         defaultValue: null,
         references: {
-          model: "Config_MatchResult",
+          model: "Config_Results",
           key: "id",
         },
         onDelete: "CASCADE",
@@ -32,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("MatchProcessingHistory");
+    await queryInterface.dropTable("MatchesProcessing");
   },
 };

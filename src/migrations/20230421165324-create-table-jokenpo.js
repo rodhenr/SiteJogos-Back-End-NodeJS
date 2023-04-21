@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Match_Jokenpo", {
+    await queryInterface.createTable("Matches_Jokenpo", {
       id: {
         allowNull: false,
         autoIncrement: { type: Sequelize.INTEGER, initialValue: 1 },
@@ -22,7 +22,7 @@ module.exports = {
       userChoiceID: {
         defaultValue: null,
         references: {
-          model: "Config_JokenpoChoice",
+          model: "Config_JokenpoChoices",
           key: "ID",
         },
         onDelete: "CASCADE",
@@ -31,7 +31,7 @@ module.exports = {
       cpuChoiceID: {
         defaultValue: null,
         references: {
-          model: "Config_JokenpoChoice",
+          model: "Config_JokenpoChoices",
           key: "ID",
         },
         onDelete: "CASCADE",
@@ -41,6 +41,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Match_Jokenpo");
+    await queryInterface.dropTable("Matches_Jokenpo");
   },
 };

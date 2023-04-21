@@ -1,7 +1,7 @@
 import {
   IGame,
-  IMatchProcessingHistory,
-  IConfig_MatchResult,
+  IMatchProcessing,
+  IConfig_Result,
   IMatch,
   IPossiblePoints,
   IUser,
@@ -52,29 +52,27 @@ export const startNewGame = async (
 };
 
 export const processGameResult = async (matchID: number, result: string) => {
-  const isProcessed: IMatchProcessingHistory =
-    await db.MatchProcessingHistory.findOne({
-      where: { matchID },
-      raw: true,
-    });
+  const isProcessed: IMatchProcessing = await db.MatchProcessing.findOne({
+    where: { matchID },
+    raw: true,
+  });
 
   if (isProcessed) {
     await db.Match.update(
-      { matchProcessingHistoryID: isProcessed.id },
+      { matchProcessingID: isProcessed.id },
       { where: { id: matchID } }
     );
 
     return;
   }
 
-  const resultTypes: IConfig_MatchResult[] =
-    await db.Config_MatchResult.findAll({
-      raw: true,
-    });
+  const resultTypes: IConfig_Result[] = await db.Config_Result.findAll({
+    raw: true,
+  });
 
   if (!resultTypes) throw createErrorObject("Resultados não encontrados.", 500);
 
-  const resultData = resultTypes.filter((r) => r.matchResult === result);
+  const resultData = resultTypes.filter((r) => r.result === result);
 
   if (resultData.length === 0)
     throw createErrorObject("Tipo de resultado informado é inválido.", 400);
@@ -111,14 +109,13 @@ export const processGameResult = async (matchID: number, result: string) => {
       transaction
     );
 
-    const processedData: IMatchProcessingHistory =
-      await db.MatchProcessingHistory.create(
-        { matchID, date: Date.now(), matchResultID: resultData[0].id },
-        { raw: true, transaction }
-      );
+    const processedData: IMatchProcessing = await db.MatchProcessing.create(
+      { matchID, date: Date.now(), resultID: resultData[0].id },
+      { raw: true, transaction }
+    );
 
     await db.Match.update(
-      { matchProcessingHistoryID: processedData.id },
+      { matchProcessingID: processedData.id },
       { where: { id: matchID } },
       transaction
     );

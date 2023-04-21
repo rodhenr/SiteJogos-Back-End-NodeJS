@@ -7,11 +7,11 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       Match.belongsTo(models.Game, { foreignKey: "gameID" });
       Match.hasOne(models.Match_TicTacToe, { foreignKey: "matchID" });
       Match.hasOne(models.Match_Jokenpo, { foreignKey: "matchID" });
-      Match.hasOne(models.MatchProcessingHistory, {
+      Match.hasOne(models.MatchProcessing, {
         foreignKey: "id",
       });
-      Match.belongsTo(models.MatchProcessingHistory, {
-        foreignKey: "matchProcessingHistoryID",
+      Match.belongsTo(models.MatchProcessing, {
+        foreignKey: "matchProcessingID",
       });
     }
   }
@@ -27,7 +27,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       userID: { allowNull: false, type: DataTypes.INTEGER },
       gameID: { allowNull: false, type: DataTypes.INTEGER },
       date: { allowNull: false, type: DataTypes.DATE },
-      matchProcessingHistoryID: { defaultValue: null, type: DataTypes.INTEGER },
+      matchProcessingID: { defaultValue: null, type: DataTypes.INTEGER },
     },
     {
       sequelize,

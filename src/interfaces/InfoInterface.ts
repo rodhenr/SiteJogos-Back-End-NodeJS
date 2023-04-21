@@ -42,7 +42,7 @@ export interface IMatch {
   userID: number;
   gameID: number;
   date: Date;
-  matchProcessingHistoryID: number;
+  matchProcessingID: number;
 }
 
 export interface ICreateMatch {
@@ -54,12 +54,12 @@ export interface IUserMatches {
   date: Date;
   userID: string;
   "Game.name": string;
-  "MatchProcessingHistory.id": number;
-  "MatchProcessingHistory.matchID": number;
-  "MatchProcessingHistory.date": Date;
-  "MatchProcessingHistory.matchResultID": number;
-  "MatchProcessingHistory.Config_MatchResult.id": number;
-  "MatchProcessingHistory.Config_MatchResult.matchResult": string;
+  "MatchProcessing.id": number;
+  "MatchProcessing.matchID": number;
+  "MatchProcessing.date": Date;
+  "MatchProcessing.resultID": number;
+  "MatchProcessing.Config_Result.id": number;
+  "MatchProcessing.Config_Result.result": string;
 }
 
 export interface IRecentMatches extends IUserMatches {
@@ -120,7 +120,7 @@ export interface IMatchTicTacToeWithMatch {
   "Match.date": Date;
   "Match.userID": number;
   "Match.gameID": number;
-  "Match.matchProcessingHistoryID": number;
+  "Match.matchProcessingID": number;
   id: number;
   matchID: number;
   isUserMove: boolean;
@@ -153,16 +153,16 @@ export interface IMatchTicTacToe extends IMatchTicTacToeCells {
   isUserMove: boolean;
 }
 
-export interface IMatchProcessingHistory {
+export interface IMatchProcessing {
   id: number;
   matchID: number;
   date: Date;
-  matchResultID: boolean;
+  resultID: boolean;
 }
 
-export interface IConfig_MatchResult {
+export interface IConfig_Result {
   id: number;
-  matchResult: string;
+  result: string;
 }
 
 export interface IPossiblePoints {

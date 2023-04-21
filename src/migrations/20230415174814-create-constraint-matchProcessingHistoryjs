@@ -4,10 +4,10 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addConstraint("Matches", {
-      fields: ["MatchProcessingHistoryID"],
-      name: "FK_Matches_MatchProcessingHistory",
+      fields: ["matchProcessingID"],
+      name: "FK_Matches_MatchesProcessing",
       references: {
-        table: "MatchProcessingHistory",
+        table: "MatchProcessing",
         field: "id",
       },
       type: "foreign key",
@@ -16,7 +16,7 @@ module.exports = {
   async down(queryInterface, Sequelize) {
     await queryInterface.removeConstraint(
       "Matches",
-      "FK_Matches_MatchProcessingHistory"
+      "FK_Matches_MatchesProcessing"
     );
   },
 };

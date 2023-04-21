@@ -4,16 +4,16 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
-      "Config_MatchResult",
+      "Config_Results",
       [
         {
-          matchResult: "win",
+          result: "win",
         },
         {
-          matchResult: "lose",
+          result: "lose",
         },
         {
-          matchResult: "draw",
+          result: "draw",
         },
       ],
       {}
@@ -21,6 +21,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Config_MatchResult", null, {});
+    await queryInterface.bulkDelete("Config_Results", null, {});
   },
 };

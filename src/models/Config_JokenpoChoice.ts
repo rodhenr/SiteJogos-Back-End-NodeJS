@@ -18,7 +18,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
     },
     {
       sequelize,
-      tableName: "Config_JokenpoChoice",
+      tableName: "Config_JokenpoChoices",
       modelName: "Config_JokenpoChoice",
       timestamps: false,
     }
