@@ -20,7 +20,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       userChoiceID: {
-        allowNull: false,
+        defaultValue: null,
         references: {
           model: "Config_JokenpoChoice",
           key: "ID",
@@ -29,7 +29,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       cpuChoiceID: {
-        allowNull: false,
+        defaultValue: null,
         references: {
           model: "Config_JokenpoChoice",
           key: "ID",

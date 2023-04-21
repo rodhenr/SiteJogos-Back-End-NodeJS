@@ -19,7 +19,7 @@ module.exports = {
           lose_points: 5,
         },
         {
-          name: "JoKenPo",
+          name: "Jokenpo",
           win_points: 2,
           draw_points: 0,
           lose_points: 0,

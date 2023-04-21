@@ -39,7 +39,7 @@ export const startNewGame = async (
       {
         matchID: newMatch.id,
       },
-      transaction
+      { transaction }
     );
 
     await transaction.commit();

@@ -28,14 +28,12 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         type: DataTypes.INTEGER,
       },
       userChoiceID: {
-        allowNull: false,
-        defaultValue: true,
-        type: DataTypes.BOOLEAN,
+        defaultValue: null,
+        type: DataTypes.INTEGER,
       },
       cpuChoiceID: {
-        allowNull: true,
         defaultValue: null,
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.INTEGER,
       },
     },
     {
