@@ -7,7 +7,7 @@ import {
   IUser,
 } from "../../interfaces/InfoInterface";
 
-import db from "../../models";
+import db, { sequelize } from "../../models";
 
 export const startNewGame = async (
   userID: number,
@@ -21,22 +21,34 @@ export const startNewGame = async (
 
   if (!gameInfo) throw createErrorObject("Este jogo não existe.", 400);
 
-  const newMatch: IMatch = await db.Match.create(
-    {
-      userID,
-      gameID,
-      date,
-    },
-    { raw: true }
-  );
+  const transaction = await sequelize.transaction();
 
-  const gameModel = db[`Match_${gameInfo.name}`];
+  try {
+    const newMatch: IMatch = await db.Match.create(
+      {
+        userID,
+        gameID,
+        date,
+      },
+      { raw: true, transaction }
+    );
 
-  await gameModel.create({
-    matchID: newMatch.id,
-  });
+    const gameModel = db[`Match_${gameInfo.name}`];
 
-  return newMatch;
+    await gameModel.create(
+      {
+        matchID: newMatch.id,
+      },
+      transaction
+    );
+
+    await transaction.commit();
+
+    return newMatch;
+  } catch (err: any) {
+    await transaction.rollback();
+    throw new Error(err);
+  }
 };
 
 export const processGameResult = async (matchID: number, result: string) => {
@@ -90,23 +102,33 @@ export const processGameResult = async (matchID: number, result: string) => {
 
   if (!userInfo) throw createErrorObject("Usuário não encontrado.", 401);
 
-  await db.User.update(
-    { experience: Number(userInfo.experience) + points },
-    { where: { id: userInfo.id } }
-  );
+  const transaction = await sequelize.transaction();
 
-  const processedData: IMatchProcessingHistory =
-    await db.MatchProcessingHistory.create(
-      { matchID, date: Date.now(), matchResultID: resultData[0].id },
-      { raw: true }
+  try {
+    await db.User.update(
+      { experience: Number(userInfo.experience) + points },
+      { where: { id: userInfo.id } },
+      transaction
     );
 
-  await db.Match.update(
-    { matchProcessingHistoryID: processedData.id },
-    { where: { id: matchID } }
-  );
+    const processedData: IMatchProcessingHistory =
+      await db.MatchProcessingHistory.create(
+        { matchID, date: Date.now(), matchResultID: resultData[0].id },
+        { raw: true, transaction }
+      );
 
-  return;
+    await db.Match.update(
+      { matchProcessingHistoryID: processedData.id },
+      { where: { id: matchID } },
+      transaction
+    );
+
+    await transaction.commit();
+    return;
+  } catch (err: any) {
+    await transaction.rollback();
+    throw new Error(err);
+  }
 };
 
 export const createErrorObject = (message: string, status: number) => {

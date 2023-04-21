@@ -99,25 +99,10 @@ export interface IUserFriends {
   name: string;
 }
 
-interface IMatchRecords {
-  gameName: string;
-  userName: string;
-  userID: number;
-  totalWins: number;
-}
-
-export interface IGames {
-  [key: string]: IMatchRecords[];
-}
-
 export interface IGamePlayerInfo {
   userID: string;
   username: string;
   wins: number;
-}
-
-export interface IGameListByPlayer {
-  [key: string]: IMatchRecords[];
 }
 
 export interface IMatchesGroup {

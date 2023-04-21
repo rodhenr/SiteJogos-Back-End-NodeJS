@@ -3,7 +3,7 @@ import {
   IMatchTicTacToeCells,
   IMatchTicTacToeWithMatch,
 } from "../../interfaces/InfoInterface";
-import db from "../../models";
+import db, { sequelize } from "../../models";
 import { createErrorObject, processGameResult } from "./generalService";
 
 export const playerMovement = async (

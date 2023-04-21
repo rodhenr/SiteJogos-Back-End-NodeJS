@@ -14,6 +14,6 @@ authRoutes.route("/api/auth/login").post(handleLogin);
 authRoutes
   .route("/api/auth/register")
   .post(verifyRegisterFields, handleRegister);
-authRoutes.route("/api/auth/refresh").post(handleRefreshToken);
+authRoutes.route("/api/auth/refresh").get(handleRefreshToken);
 
 export default authRoutes;
