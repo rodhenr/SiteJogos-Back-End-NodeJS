@@ -6,6 +6,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       Match.belongsTo(models.User, { foreignKey: "userID" });
       Match.belongsTo(models.Game, { foreignKey: "gameID" });
       Match.hasOne(models.Match_TicTacToe, { foreignKey: "matchID" });
+      Match.hasOne(models.Match_Jokenpo, { foreignKey: "matchID" });
       Match.hasOne(models.MatchProcessingHistory, {
         foreignKey: "id",
       });
