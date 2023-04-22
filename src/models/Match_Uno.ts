@@ -1,0 +1,69 @@
+import { Model, Sequelize } from "sequelize";
+
+module.exports = (sequelize: Sequelize, DataTypes: any) => {
+  class Match_Uno extends Model {
+    static associate(models: any) {
+      Match_Uno.belongsTo(models.Match, { foreignKey: "matchID" });
+      Match_Uno.belongsTo(models.Config_UnoCards, { foreignKey: "lastCardID" });
+    }
+  }
+
+  Match_Uno.init(
+    {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER,
+      },
+      matchID: {
+        allowNull: false,
+        type: DataTypes.INTEGER,
+      },
+      gameOrder: {
+        allowNull: false,
+        type: DataTypes.STRING(100),
+      },
+      nextPlayer: {
+        allowNull: false,
+        type: DataTypes.INTEGER,
+      },
+      remainingCards: {
+        allowNull: false,
+        type: DataTypes.STRING(1000),
+      },
+      gameHistory: {
+        defaultValue: null,
+        type: DataTypes.STRING(2000),
+      },
+      lastCardID: {
+        defaultValue: null,
+        type: DataTypes.INTEGER,
+      },
+      userCards: {
+        allowNull: false,
+        type: DataTypes.STRING(1000),
+      },
+      cpu1Cards: {
+        allowNull: false,
+        type: DataTypes.STRING(1000),
+      },
+      cpu2Cards: {
+        allowNull: false,
+        type: DataTypes.STRING(1000),
+      },
+      cpu3Cards: {
+        allowNull: false,
+        type: DataTypes.STRING(1000),
+      },
+    },
+    {
+      sequelize,
+      tableName: "Matches_Uno",
+      modelName: "Match_Uno",
+      timestamps: false,
+    }
+  );
+
+  return Match_Uno;
+};
