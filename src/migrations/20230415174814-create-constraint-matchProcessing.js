@@ -7,7 +7,7 @@ module.exports = {
       fields: ["matchProcessingID"],
       name: "FK_Matches_MatchesProcessing",
       references: {
-        table: "MatchProcessing",
+        table: "MatchesProcessing",
         field: "id",
       },
       type: "foreign key",

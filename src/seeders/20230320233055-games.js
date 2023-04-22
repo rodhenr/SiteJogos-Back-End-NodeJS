@@ -36,6 +36,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.sequelize.query("DBCC CHECKIDENT('Games', RESEED, 0)");
     await queryInterface.bulkDelete("Games", null, {});
   },
 };

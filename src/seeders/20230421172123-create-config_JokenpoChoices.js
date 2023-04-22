@@ -21,6 +21,9 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.sequelize.query(
+      "DBCC CHECKIDENT('Config_JokenpoChoices', RESEED, 0)"
+    );
     await queryInterface.bulkDelete("Config_JokenpoChoices", null, {});
   },
 };

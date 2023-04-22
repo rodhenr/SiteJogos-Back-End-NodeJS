@@ -52,6 +52,9 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.sequelize.query(
+      "DBCC CHECKIDENT('Experience', RESEED, 0)"
+    );
     await queryInterface.bulkDelete("Experience", null, {});
   },
 };

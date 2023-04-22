@@ -21,6 +21,9 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.sequelize.query(
+      "DBCC CHECKIDENT('Config_Results', RESEED, 0)"
+    );
     await queryInterface.bulkDelete("Config_Results", null, {});
   },
 };
