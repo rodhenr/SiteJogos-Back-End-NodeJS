@@ -4,7 +4,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
   class Match_Uno extends Model {
     static associate(models: any) {
       Match_Uno.belongsTo(models.Match, { foreignKey: "matchID" });
-      Match_Uno.belongsTo(models.Config_UnoCards, { foreignKey: "lastCardID" });
+      Match_Uno.belongsTo(models.Config_UnoCard, { foreignKey: "lastCardID" });
     }
   }
 
@@ -20,13 +20,14 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         allowNull: false,
         type: DataTypes.INTEGER,
       },
-      gameOrder: {
+      isClockwise: {
         allowNull: false,
-        type: DataTypes.STRING(100),
+        defaultValue: true,
+        type: DataTypes.BOOLEAN,
       },
       nextPlayer: {
         allowNull: false,
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(10),
       },
       remainingCards: {
         allowNull: false,

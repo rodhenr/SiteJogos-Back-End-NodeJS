@@ -19,13 +19,14 @@ module.exports = {
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
       },
-      gameOrder: {
+      isClockwise: {
         allowNull: false,
-        type: Sequelize.STRING(100),
+        defaultValue: true,
+        type: Sequelize.BOOLEAN,
       },
       nextPlayer: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(10),
       },
       remainingCards: {
         allowNull: false,

@@ -34,21 +34,74 @@ export const startNewGame = async (
       { raw: true, transaction }
     );
 
-    const gameModel = db[`Match_${gameInfo.name}`];
-
-    await gameModel.create(
-      {
-        matchID: newMatch.id,
-      },
-      { transaction }
-    );
+    await createGame(gameInfo.name.toLowerCase(), transaction, newMatch.id);
 
     await transaction.commit();
 
     return newMatch;
   } catch (err: any) {
+    console.log(err);
     await transaction.rollback();
     throw new Error(err);
+  }
+};
+
+const createGame = async (
+  gameName: string,
+  transaction: Transaction,
+  matchID: number
+) => {
+  const gameModel = db[`Match_${gameName}`];
+
+  if (gameName === "uno") {
+    const arrPlayers = ["user", "cpu1", "cpu2", "cpu3"];
+    const randNum = Math.floor(Math.random() * 4);
+    const nextPlayer = arrPlayers[randNum];
+
+    const allCards: any[] = await db.Config_UnoCard.findAll({
+      attributes: ["id"],
+      raw: true,
+    });
+
+    if (allCards.length !== 60)
+      throw new Error("A configuração de cartas está incorreta.");
+
+    const arrCards = allCards.map((card) => card.id);
+
+    function shuffleArray(array: any[]) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+
+      return array;
+    }
+
+    const shuffledArray: any[] = shuffleArray(arrCards);
+    const userCards = JSON.stringify(shuffledArray.splice(0, 5));
+    const cpu1Cards = JSON.stringify(shuffledArray.splice(0, 5));
+    const cpu2Cards = JSON.stringify(shuffledArray.splice(0, 5));
+    const cpu3Cards = JSON.stringify(shuffledArray.splice(0, 5));
+
+    await db.Match_Uno.create(
+      {
+        nextPlayer: nextPlayer,
+        matchID,
+        remainingCards: JSON.stringify(shuffledArray),
+        userCards,
+        cpu1Cards,
+        cpu2Cards,
+        cpu3Cards,
+      },
+      { transaction }
+    );
+  } else {
+    await gameModel.create(
+      {
+        matchID,
+      },
+      { transaction }
+    );
   }
 };
 
