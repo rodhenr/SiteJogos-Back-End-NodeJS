@@ -34,7 +34,8 @@ export const playerMovement = async (
   try {
     await db.Match_TicTacToe.update(
       { [cellPosition]: 1, isUserMove: false },
-      { where: { matchID: matchID } }
+      { where: { matchID: matchID } },
+      transaction
     );
 
     const updatedMatch: IMatchTicTacToeCells = await db.Match_TicTacToe.findOne(
