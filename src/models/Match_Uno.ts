@@ -33,6 +33,11 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         allowNull: false,
         type: DataTypes.STRING(1000),
       },
+      remainingPlayers: {
+        allowNull: false,
+        defaultValue: '["user", "cpu1", "cpu2", "cpu3"]',
+        type: DataTypes.STRING(100),
+      },
       gameHistory: {
         defaultValue: null,
         type: DataTypes.STRING(2000),
@@ -40,6 +45,10 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       lastCardID: {
         defaultValue: null,
         type: DataTypes.INTEGER,
+      },
+      currentColor: {
+        defaultValue: null,
+        type: DataTypes.STRING(10),
       },
       userCards: {
         allowNull: false,

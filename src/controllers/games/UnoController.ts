@@ -1,14 +1,11 @@
 import { Request, Response } from "express";
 import db from "../../models";
-import {
-  cpuMovement,
-  playerMovement,
-} from "../../services/games/TicTacToeService";
+
 import { IUser } from "../../interfaces/InfoInterface";
 import { cpuAction, playerAction } from "../../services/games/UnoService";
 
 export const playerTurn = async (req: Request | any, res: Response) => {
-  const { matchID, card } = req.body;
+  const { matchID, card, color = null } = req.body;
 
   if (!matchID || !card)
     return res
@@ -25,10 +22,11 @@ export const playerTurn = async (req: Request | any, res: Response) => {
 
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
-    const data = await playerAction();
+    const data = await playerAction(matchID, card, color);
 
-    return res.status(200).json();
+    return res.status(200).json({ ...data });
   } catch (err: any) {
+    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,

@@ -32,6 +32,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(1000),
       },
+      remainingPlayers: {
+        allowNull: false,
+        type: Sequelize.STRING(100),
+      },
       gameHistory: {
         defaultValue: null,
         type: Sequelize.STRING(2000),
@@ -44,6 +48,10 @@ module.exports = {
         },
         onDelete: "CASCADE",
         type: Sequelize.INTEGER,
+      },
+      currentColor: {
+        defaultValue: null,
+        type: Sequelize.STRING(10),
       },
       userCards: {
         allowNull: false,

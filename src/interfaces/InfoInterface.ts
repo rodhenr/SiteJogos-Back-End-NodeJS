@@ -195,3 +195,47 @@ export interface IPossiblePoints {
   win_points: number;
   draw_points: number;
 }
+
+export interface IMatchUno {
+  id: number;
+  matchID: number;
+  isClockwise: boolean;
+  nextPlayer: string;
+  remainingCards: string;
+  remainingPlayers: string;
+  gameHistory: null | string;
+  lastCardID: null | string;
+  currentColor: null | string;
+  userCards: string;
+  cpu1Cards: string;
+  cpu2Cards: string;
+  cpu3Cards: string;
+}
+
+export interface IMatchUnoWithMatch extends IMatchUno {
+  "Match.id": number;
+  "Match.date": Date;
+  "Match.userID": number;
+  "Match.gameID": number;
+  "Match.matchProcessingID": number;
+}
+
+export interface IConfigUnoCards {
+  id: number;
+  card: string;
+  color: string | null;
+  value: number | null;
+  is_num: boolean;
+  is_block: boolean;
+  is_reverse: boolean;
+  is_plusTwo: boolean;
+  is_plusFour: boolean;
+  is_changeColor: boolean;
+}
+
+export interface ICardsObj {
+  userCards: number[];
+  cpu1Cards: number[];
+  cpu2Cards: number[];
+  cpu3Cards: number[];
+}
