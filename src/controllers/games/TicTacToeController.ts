@@ -34,6 +34,7 @@ export const playerMove = async (req: Request | any, res: Response) => {
 
     return res.status(200).json({ ...dataAfterPlayerMovement });
   } catch (err: any) {
+    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,

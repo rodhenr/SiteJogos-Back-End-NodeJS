@@ -21,6 +21,9 @@ export const playerMovement = async (
 
   await earlyMatchResultCheck(match, true);
 
+  if (!match.isUserMove)
+    throw createErrorObject("Não é o turno do jogador.", 400);
+
   const cellPosition = `isUserCell_${squarePosition}` as keyof IMatchTicTacToe;
 
   if (
@@ -46,7 +49,8 @@ export const playerMovement = async (
       }
     );
 
-    const isGameOver = await checkGameOver(updatedMatch, matchID, transaction);
+    const isGameOver: { isGameOver: boolean; result: string | null } =
+      await checkGameOver(updatedMatch, matchID, transaction);
 
     await transaction.commit();
 
@@ -58,6 +62,7 @@ export const playerMovement = async (
       cells: Object.values(updatedMatch),
     };
   } catch (err: any) {
+    console.log(err);
     await transaction.rollback();
     throw new Error(err);
   }
@@ -74,6 +79,8 @@ export const cpuMovement = async (matchID: number, userID: number) => {
     throw createErrorObject("Usuário inválido para está partida", 401);
 
   await earlyMatchResultCheck(match, false);
+
+  if (match.isUserMove) throw createErrorObject("Não é o turno do CPU.", 400);
 
   const possibleMoves = Object.keys(match).filter((key) => {
     return (
@@ -194,33 +201,29 @@ const checkGameOver = async (
     (item) => item.cell1 !== null && item.cell2 !== null && item.cell3 !== null
   );
 
-  if (checkUserWin) {
-    await processGameResult(matchID, "win", transaction);
-    return { isGameOver: true, result: "win" };
-  } else if (checkCPUWin) {
-    await processGameResult(matchID, "lose", transaction);
-    return { isGameOver: true, result: "lose" };
-  } else if (checkDraw) {
-    await processGameResult(matchID, "draw", transaction);
-    return { isGameOver: true, result: "draw" };
-  }
+  try {
+    if (checkUserWin) {
+      await processGameResult(matchID, "win", transaction);
+      return { isGameOver: true, result: "win" };
+    } else if (checkCPUWin) {
+      await processGameResult(matchID, "lose", transaction);
+      return { isGameOver: true, result: "lose" };
+    } else if (checkDraw) {
+      await processGameResult(matchID, "draw", transaction);
+      return { isGameOver: true, result: "draw" };
+    }
 
-  return { isGameOver: false, result: null };
+    return { isGameOver: false, result: null };
+  } catch (err: any) {
+    console.log(err);
+    throw new Error(err);
+  }
 };
 
 const earlyMatchResultCheck = async (
   match: IMatchTicTacToeWithMatch,
   isUser: boolean
 ) => {
-  if (match["Match.matchProcessingID"] !== null)
-    throw createErrorObject("Partida já encerrada.", 400);
-
-  if (isUser && !match.isUserMove)
-    throw createErrorObject("Não é o turno do jogador.", 400);
-
-  if (!isUser && match.isUserMove)
-    throw createErrorObject("Não é o turno do CPU.", 400);
-
   const matchCells = {
     isUserCell_1: match.isUserCell_1,
     isUserCell_2: match.isUserCell_2,

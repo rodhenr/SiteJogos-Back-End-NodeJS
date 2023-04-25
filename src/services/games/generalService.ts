@@ -34,7 +34,7 @@ export const startNewGame = async (
       { raw: true, transaction }
     );
 
-    await createGame(gameInfo.name.toLowerCase(), transaction, newMatch.id);
+    await createGame(gameInfo.name, transaction, newMatch.id);
 
     await transaction.commit();
 
@@ -53,7 +53,7 @@ const createGame = async (
 ) => {
   const gameModel = db[`Match_${gameName}`];
 
-  if (gameName === "uno") {
+  if (gameName.toLowerCase() === "uno") {
     const arrPlayers = ["user", "cpu1", "cpu2", "cpu3"];
     const randNum = Math.floor(Math.random() * 4);
     const nextPlayer = arrPlayers[randNum];
@@ -166,7 +166,8 @@ export const processGameResult = async (
 
   const processedData: IMatchProcessing = await db.MatchProcessing.create(
     { matchID, date: Date.now(), resultID: resultData[0].id },
-    { raw: true, transaction }
+    { raw: true },
+    transaction
   );
 
   await db.Match.update(
