@@ -34,7 +34,11 @@ export const startNewGame = async (
       { raw: true, transaction }
     );
 
-    await createGame(gameInfo.name, transaction, newMatch.id);
+    if (gameInfo.name.toLowerCase() === "uno") {
+      await createUnoGame(transaction, newMatch.id);
+    } else {
+      await createGame(gameInfo.name, transaction, newMatch.id);
+    }
 
     await transaction.commit();
 
@@ -53,56 +57,56 @@ const createGame = async (
 ) => {
   const gameModel = db[`Match_${gameName}`];
 
-  if (gameName.toLowerCase() === "uno") {
-    const arrPlayers = ["user", "cpu1", "cpu2", "cpu3"];
-    const randNum = Math.floor(Math.random() * 4);
-    const nextPlayer = arrPlayers[randNum];
+  await gameModel.create(
+    {
+      matchID,
+    },
+    { transaction }
+  );
+};
 
-    const allCards: any[] = await db.Config_UnoCard.findAll({
-      attributes: ["id"],
-      raw: true,
-    });
+const createUnoGame = async (transaction: Transaction, matchID: number) => {
+  const arrPlayers = ["user", "cpu1", "cpu2", "cpu3"];
+  const randNum = Math.floor(Math.random() * 4);
+  const nextPlayer = arrPlayers[randNum];
 
-    if (allCards.length !== 60)
-      throw new Error("A configuração de cartas está incorreta.");
+  const allCards: any[] = await db.Config_UnoCard.findAll({
+    attributes: ["card"],
+    raw: true,
+  });
 
-    const arrCards = allCards.map((card) => card.id);
+  if (allCards.length !== 60)
+    throw new Error("A configuração de cartas está incorreta.");
 
-    function shuffleArray(array: any[]) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
+  const arrCards = allCards.map((card: { card: string }) => card.card);
 
-      return array;
+  function shuffleArray(array: string[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
 
-    const shuffledArray: any[] = shuffleArray(arrCards);
-    const userCards = JSON.stringify(shuffledArray.splice(0, 5));
-    const cpu1Cards = JSON.stringify(shuffledArray.splice(0, 5));
-    const cpu2Cards = JSON.stringify(shuffledArray.splice(0, 5));
-    const cpu3Cards = JSON.stringify(shuffledArray.splice(0, 5));
-
-    await db.Match_Uno.create(
-      {
-        nextPlayer: nextPlayer,
-        matchID,
-        remainingCards: JSON.stringify(shuffledArray),
-        userCards,
-        cpu1Cards,
-        cpu2Cards,
-        cpu3Cards,
-      },
-      { transaction }
-    );
-  } else {
-    await gameModel.create(
-      {
-        matchID,
-      },
-      { transaction }
-    );
+    return array;
   }
+
+  const shuffledArray: string[] = shuffleArray(arrCards);
+  const userCards = JSON.stringify(shuffledArray.splice(0, 5));
+  const cpu1Cards = JSON.stringify(shuffledArray.splice(0, 5));
+  const cpu2Cards = JSON.stringify(shuffledArray.splice(0, 5));
+  const cpu3Cards = JSON.stringify(shuffledArray.splice(0, 5));
+
+  await db.Match_Uno.create(
+    {
+      nextPlayer: nextPlayer,
+      matchID,
+      remainingCards: JSON.stringify(shuffledArray),
+      userCards,
+      cpu1Cards,
+      cpu2Cards,
+      cpu3Cards,
+    },
+    { transaction }
+  );
 };
 
 export const processGameResult = async (

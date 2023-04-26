@@ -1,17 +1,43 @@
 import { Request, Response } from "express";
-import db, { sequelize } from "../../models";
+import db from "../../models";
 
-import {
-  IConfigUnoCards,
-  IMatchUno,
-  IUser,
-} from "../../interfaces/InfoInterface";
+import { IMatchUno, IUser } from "../../interfaces/InfoInterface";
 import {
   buyCardAction,
+  getInitialData,
   cpuAction,
   playerAction,
   skipTurnAction,
 } from "../../services/games/UnoService";
+import { startNewGame } from "../../services/games/generalService";
+
+export const newUnoGame = async (req: Request | any, res: Response) => {
+  try {
+    const user: string = req.user;
+
+    const userInfo: IUser = await db.User.findOne({
+      where: { user: user },
+      raw: true,
+    });
+
+    if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
+
+    const newGame = await startNewGame(userInfo.id, 1, new Date());
+    const data = await getInitialData(newGame.id);
+
+    return res.status(200).json({ ...data, matchID: newGame.id });
+  } catch (err: any) {
+    console.log(err);
+    if (err?.statusCode) {
+      return res.status(err.statusCode).json({
+        message: err.message,
+      });
+    }
+    return res.status(500).json({
+      message: "Ocorreu um erro no servidor. Tente novamente mais tarde.",
+    });
+  }
+};
 
 export const playerTurn = async (req: Request | any, res: Response) => {
   const { matchID, card, color = null } = req.body;
@@ -31,9 +57,25 @@ export const playerTurn = async (req: Request | any, res: Response) => {
 
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
-    const data = await playerAction(matchID, card, color);
+    await playerAction(matchID, card, color);
 
-    return res.status(200).json({ ...data });
+    const data: IMatchUno = await db.Match_Uno.findOne({
+      where: { matchID },
+      raw: true,
+    });
+
+    return res.status(200).json({
+      color: data.currentColor,
+      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
+      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
+      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
+      isClockwise: data.isClockwise,
+      lastCard: data.lastCard,
+      nextPlayer: data.nextPlayer,
+      remainingCardsLength: JSON.parse(data.remainingCards).length,
+      remainingPlayers: JSON.parse(data.remainingPlayers),
+      userCards: JSON.parse(data.userCards),
+    });
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {
@@ -48,9 +90,9 @@ export const playerTurn = async (req: Request | any, res: Response) => {
 };
 
 export const cpuTurn = async (req: Request | any, res: Response) => {
-  const { matchID, player } = req.body;
+  const { matchID } = req.body;
 
-  if (!matchID || !player)
+  if (!matchID)
     return res
       .status(400)
       .json({ message: "Parâmetro(s) de entrada inválido(s)." });
@@ -65,28 +107,27 @@ export const cpuTurn = async (req: Request | any, res: Response) => {
 
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
-    await cpuAction(matchID, player);
+    await cpuAction(matchID);
 
     const data: IMatchUno = await db.Match_Uno.findOne({
       where: { matchID },
       raw: true,
     });
 
-    const lastCard: IConfigUnoCards = await db.Config_UnoCard.findOne({
-      where: { id: data.lastCardID },
-      raw: true,
-    });
-
     return res.status(200).json({
       color: data.currentColor,
+      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
+      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
+      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
       isClockwise: data.isClockwise,
-      lastCard: lastCard?.card,
+      lastCard: data.lastCard,
       nextPlayer: data.nextPlayer,
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
       userCards: JSON.parse(data.userCards),
     });
   } catch (err: any) {
+    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,
@@ -123,15 +164,13 @@ export const buyCard = async (req: Request | any, res: Response) => {
       raw: true,
     });
 
-    const lastCard: IConfigUnoCards = await db.Config_UnoCard.findOne({
-      where: { id: data.lastCardID },
-      raw: true,
-    });
-
     return res.status(200).json({
       color: data.currentColor,
+      cpu1CardsLength: data.cpu1Cards.length,
+      cpu2CardsLength: data.cpu2Cards.length,
+      cpu3CardsLength: data.cpu3Cards.length,
       isClockwise: data.isClockwise,
-      lastCard: lastCard?.card,
+      lastCard: data.lastCard,
       nextPlayer: data.nextPlayer,
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
@@ -175,15 +214,13 @@ export const skipTurn = async (req: Request | any, res: Response) => {
       raw: true,
     });
 
-    const lastCard: IConfigUnoCards = await db.Config_UnoCard.findOne({
-      where: { id: data.lastCardID },
-      raw: true,
-    });
-
     return res.status(200).json({
       color: data.currentColor,
+      cpu1CardsLength: data.cpu1Cards.length,
+      cpu2CardsLength: data.cpu2Cards.length,
+      cpu3CardsLength: data.cpu3Cards.length,
       isClockwise: data.isClockwise,
-      lastCard: lastCard?.card,
+      lastCard: data.lastCard,
       nextPlayer: data.nextPlayer,
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),

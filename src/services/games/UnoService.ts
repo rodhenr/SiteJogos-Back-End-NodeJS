@@ -7,6 +7,32 @@ import {
 import db, { sequelize } from "../../models";
 import { createErrorObject, processGameResult } from "./generalService";
 
+export const getInitialData = async (matchID: number) => {
+  const match: IMatchUnoWithMatch = await db.Match_Uno.findOne({
+    include: [{ model: db.Match }],
+    where: { matchID },
+    raw: true,
+  });
+
+  if (!match) throw createErrorObject("Partida não encontrada.", 400);
+
+  if (match["Match.matchProcessingID"] !== null)
+    throw createErrorObject("Partida já encerrada.", 400);
+
+  return {
+    color: match.currentColor,
+    cpu1Cards: JSON.parse(match.cpu1Cards).length,
+    cpu2Cards: JSON.parse(match.cpu2Cards).length,
+    cpu3Cards: JSON.parse(match.cpu3Cards).length,
+    isClockwise: match.isClockwise,
+    lastPlayedCard: match.lastCard,
+    nextPlayer: match.nextPlayer,
+    remainingCardsLength: JSON.parse(match.remainingCards).length,
+    remainingPlayers: JSON.parse(match.remainingPlayers),
+    userCards: JSON.parse(match.userCards),
+  };
+};
+
 export const playerAction = async (
   matchID: number,
   card: string,
@@ -28,7 +54,15 @@ export const playerAction = async (
   if (match.nextPlayer !== "user")
     throw createErrorObject("Não é o turno do jogador.", 400);
 
-  if (card.startsWith("plusFour") || (card.startsWith("changeColor") && !color))
+  const playerCards: string[] = JSON.parse(match.userCards);
+
+  if (!playerCards.includes(card))
+    throw createErrorObject("Carta inválida para o jogador.", 400);
+
+  if (
+    card.startsWith("plusFour") ||
+    ((card.startsWith("changeColor") || card.startsWith("plusFour")) && !color)
+  )
     throw createErrorObject("Cor não selecionada.", 400);
 
   const remainingPlayers = JSON.parse(match.remainingPlayers);
@@ -44,12 +78,6 @@ export const playerAction = async (
   if (!playerCardConfig)
     throw createErrorObject("Carta inválida para o jogador.", 400);
 
-  const choosedCardID: number = playerCardConfig.id;
-  const playerCards: number[] = JSON.parse(match.userCards);
-
-  if (!playerCards.includes(choosedCardID))
-    throw createErrorObject("Carta inválida para o jogador.", 400);
-
   const isValidPlay = await checkValidPlay(
     playerCardConfig,
     match,
@@ -58,7 +86,7 @@ export const playerAction = async (
 
   if (!isValidPlay) throw createErrorObject("Jogada inválida.", 400);
 
-  const data = dataAfterPlay(match, playerCardConfig, playerCards, color);
+  const data = handlePlay(match, playerCardConfig, playerCards, color);
 
   await db.Match_Uno.update(
     {
@@ -68,7 +96,7 @@ export const playerAction = async (
       cpu3Cards: JSON.stringify(data.cpu3Cards),
       isClockwise: data.isClockwise,
       gameHistory: JSON.stringify(data.gameHistory),
-      lastCardID: choosedCardID,
+      lastCard: card,
       nextPlayer: data.nextPlayer,
       remainingPlayers: JSON.stringify(data.remainingPlayers),
       userCards: JSON.stringify(data.userCards),
@@ -78,22 +106,9 @@ export const playerAction = async (
   );
 
   await transaction.commit();
-
-  return {
-    color: data.color,
-    cpu1Cards: data.cpu1Cards,
-    cpu2Cards: data.cpu2Cards,
-    cpu3Cards: data.cpu3Cards,
-    isClockwise: data.isClockwise,
-    lastPlayedCard: card,
-    nextPlayer: data.nextPlayer,
-    remainingCardsLength: data.remainingCards.length,
-    remainingPlayers: data.remainingPlayers,
-    userCards: data.userCards,
-  };
 };
 
-export const cpuAction = async (matchID: number, player: string) => {
+export const cpuAction = async (matchID: number) => {
   const match: IMatchUnoWithMatch = await db.Match_Uno.findOne({
     include: [{ model: db.Match }],
     where: { matchID },
@@ -107,15 +122,17 @@ export const cpuAction = async (matchID: number, player: string) => {
   if (match["Match.matchProcessingID"] !== null)
     throw createErrorObject("Partida já encerrada.", 400);
 
-  if (match.nextPlayer !== player)
-    throw createErrorObject("Não é o turno do jogador.", 400);
+  const player = match.nextPlayer;
+
+  if (match.nextPlayer === "user")
+    throw createErrorObject("Não é o turno do CPU.", 400);
 
   const remainingPlayers = JSON.parse(match.remainingPlayers);
 
   if (remainingPlayers.length < 2)
     return await handleGameOver(matchID, remainingPlayers, transaction);
 
-  const cpuCards: number[] = JSON.parse(
+  const cpuCards: string[] = JSON.parse(
     match[
       `${player}Cards` as keyof {
         cpu1Cards: string;
@@ -130,7 +147,7 @@ export const cpuAction = async (matchID: number, player: string) => {
     cpuCards.map(async (card) => {
       const playerCardConfig: IConfigUnoCards = await db.Config_UnoCard.findOne(
         {
-          where: { id: card },
+          where: { card: card },
           raw: true,
         }
       );
@@ -153,22 +170,17 @@ export const cpuAction = async (matchID: number, player: string) => {
     }
   }
 
-  const cardID = cpuCards[moveIndex];
+  const choosedCard = cpuCards[moveIndex];
 
   const playerCardConfig: IConfigUnoCards = await db.Config_UnoCard.findOne({
-    where: { id: cardID },
+    where: { card: choosedCard },
     raw: true,
   });
 
   const colors = ["red", "blue", "green", "yellow"];
   const randNum = Math.ceil(Math.random() * 4);
 
-  const data = dataAfterPlay(
-    match,
-    playerCardConfig,
-    cpuCards,
-    colors[randNum]
-  );
+  const data = handlePlay(match, playerCardConfig, cpuCards, colors[randNum]);
 
   await db.Match_Uno.update(
     {
@@ -178,7 +190,7 @@ export const cpuAction = async (matchID: number, player: string) => {
       cpu3Cards: JSON.stringify(data.cpu3Cards),
       isClockwise: data.isClockwise,
       gameHistory: JSON.stringify(data.gameHistory),
-      lastCardID: cardID,
+      lastCard: choosedCard,
       nextPlayer: data.nextPlayer,
       remainingPlayers: JSON.stringify(data.remainingPlayers),
       userCards: JSON.stringify(data.userCards),
@@ -198,12 +210,12 @@ const checkValidPlay = async (
   if (
     currentCard.is_plusFour ||
     currentCard.is_changeColor ||
-    (!match.lastCardID && !match.currentColor && !match.gameHistory)
+    (!match.lastCard && !match.currentColor && !match.gameHistory)
   )
     return true;
 
   const lastCard: IConfigUnoCards = await db.Config_UnoCard.findOne({
-    where: { id: match.lastCardID },
+    where: { card: match.lastCard },
     raw: true,
   });
 
@@ -290,24 +302,29 @@ const findNextPlayerWithCard = (
   }
 };
 
-const cardsAfterPlay = (cards: number[], choosedCardID: number) => {
-  const remainingCards = cards.filter((card) => card !== choosedCardID);
+const cardsAfterPlay = (cards: string[], choosedCard: string) => {
+  const remainingCards = cards.filter((card) => card !== choosedCard);
 
   return remainingCards;
 };
 
-const dataAfterPlay = (
+const handlePlay = (
   match: IMatchUnoWithMatch,
   choosedCard: IConfigUnoCards,
-  cards: number[],
+  cards: string[],
   color: null | string
 ) => {
-  const cardsObj: ICardsObj = {
-    userCards: cardsAfterPlay(cards, choosedCard.id),
-    cpu1Cards: JSON.parse(match.cpu1Cards),
-    cpu2Cards: JSON.parse(match.cpu2Cards),
-    cpu3Cards: JSON.parse(match.cpu3Cards),
+  const cardsObj: any = {
+    [`${match.nextPlayer}Cards`]: cardsAfterPlay(cards, choosedCard.card),
   };
+
+  if (!cardsObj["cpu1Cards"]) cardsObj.cpu1Cards = JSON.parse(match.cpu1Cards);
+
+  if (!cardsObj["cpu2Cards"]) cardsObj.cpu2Cards = JSON.parse(match.cpu2Cards);
+
+  if (!cardsObj["cpu3Cards"]) cardsObj.cpu3Cards = JSON.parse(match.cpu3Cards);
+
+  if (!cardsObj["userCards"]) cardsObj.userCards = JSON.parse(match.userCards);
 
   const gameHistory: string[] = match.gameHistory
     ? JSON.parse(match.gameHistory)
@@ -322,7 +339,7 @@ const dataAfterPlay = (
     choosedCard.card
   );
 
-  const remainingCards: number[] = JSON.parse(match.remainingCards);
+  const remainingCards: string[] = JSON.parse(match.remainingCards);
 
   const nextPlayerWithName = `${nextPlayer}Cards`;
 
@@ -359,7 +376,7 @@ const dataAfterPlay = (
     isClockwise: choosedCard.card.startsWith("reverse")
       ? !match.isClockwise
       : match.isClockwise,
-    lastCardID: choosedCard.id,
+    lastCard: choosedCard.card,
     nextPlayer,
     remainingCards,
     remainingPlayers,
@@ -414,7 +431,7 @@ export const buyCardAction = async (matchID: number, player: string) => {
     match.isClockwise
   );
 
-  const newCard: number[] = remainingCards.splice(0, 1);
+  const newCard: string[] = remainingCards.splice(0, 1);
 
   cardsObj[`${player}Cards` as keyof ICardsObj].push(...newCard);
 

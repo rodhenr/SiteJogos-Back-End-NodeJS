@@ -204,7 +204,7 @@ export interface IMatchUno {
   remainingCards: string;
   remainingPlayers: string;
   gameHistory: null | string;
-  lastCardID: null | string;
+  lastCard: null | string;
   currentColor: null | string;
   userCards: string;
   cpu1Cards: string;
@@ -234,8 +234,8 @@ export interface IConfigUnoCards {
 }
 
 export interface ICardsObj {
-  userCards: number[];
-  cpu1Cards: number[];
-  cpu2Cards: number[];
-  cpu3Cards: number[];
+  userCards: string[];
+  cpu1Cards: string[];
+  cpu2Cards: string[];
+  cpu3Cards: string[];
 }

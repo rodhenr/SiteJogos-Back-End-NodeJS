@@ -9,6 +9,7 @@ import { playerChoice } from "../controllers/games/JokenpoController";
 import {
   buyCard,
   cpuTurn,
+  newUnoGame,
   playerTurn,
   skipTurn,
 } from "../controllers/games/UnoController";
@@ -24,6 +25,7 @@ gameRoute
   .route("/api/games/jokenpo/player/choice")
   .post(verifyJWT, playerChoice);
 
+gameRoute.route("/api/games/uno/new").post(verifyJWT, newUnoGame);
 gameRoute.route("/api/games/uno/player/move").post(verifyJWT, playerTurn);
 gameRoute.route("/api/games/uno/buy").post(verifyJWT, buyCard);
 gameRoute.route("/api/games/uno/skip").post(verifyJWT, skipTurn);

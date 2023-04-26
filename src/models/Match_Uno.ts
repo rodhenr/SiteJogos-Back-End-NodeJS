@@ -4,7 +4,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
   class Match_Uno extends Model {
     static associate(models: any) {
       Match_Uno.belongsTo(models.Match, { foreignKey: "matchID" });
-      Match_Uno.belongsTo(models.Config_UnoCard, { foreignKey: "lastCardID" });
+      Match_Uno.belongsTo(models.Config_UnoCard, { foreignKey: "lastCard" });
     }
   }
 
@@ -42,9 +42,9 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         defaultValue: null,
         type: DataTypes.STRING(2000),
       },
-      lastCardID: {
+      lastCard: {
         defaultValue: null,
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(20),
       },
       currentColor: {
         defaultValue: null,

@@ -40,14 +40,14 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.STRING(2000),
       },
-      lastCardID: {
+      lastCard: {
         defaultValue: null,
         references: {
           model: "Config_UnoCards",
-          key: "ID",
+          key: "card",
         },
         onDelete: "CASCADE",
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(20)
       },
       currentColor: {
         defaultValue: null,

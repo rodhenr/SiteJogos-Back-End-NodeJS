@@ -7,11 +7,11 @@ module.exports = {
       id: {
         allowNull: false,
         autoIncrement: { type: Sequelize.INTEGER, initialValue: 1 },
-        primaryKey: true,
         type: Sequelize.INTEGER,
       },
       card: {
         allowNull: false,
+        primaryKey: true,
         type: Sequelize.STRING(20),
       },
       color: {
