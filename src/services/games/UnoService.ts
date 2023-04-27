@@ -59,10 +59,7 @@ export const playerAction = async (
   if (!playerCards.includes(card))
     throw createErrorObject("Carta inválida para o jogador.", 400);
 
-  if (
-    card.startsWith("plusFour") ||
-    ((card.startsWith("changeColor") || card.startsWith("plusFour")) && !color)
-  )
+  if ((card.startsWith("changeColor") || card.startsWith("plusFour")) && !color)
     throw createErrorObject("Cor não selecionada.", 400);
 
   const remainingPlayers = JSON.parse(match.remainingPlayers);
@@ -222,7 +219,12 @@ const checkValidPlay = async (
   if (!lastCard) return false;
 
   if (
-    (lastCard.is_block || lastCard.is_reverse || lastCard.is_plusTwo) &&
+    (lastCard.is_block ||
+      lastCard.is_reverse ||
+      lastCard.is_plusTwo ||
+      currentCard.is_block ||
+      currentCard.is_reverse ||
+      currentCard.is_plusTwo) &&
     lastCard.color === currentCard.color
   )
     return true;

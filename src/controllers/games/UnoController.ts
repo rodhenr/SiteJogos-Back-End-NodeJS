@@ -23,9 +23,25 @@ export const newUnoGame = async (req: Request | any, res: Response) => {
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     const newGame = await startNewGame(userInfo.id, 1, new Date());
-    const data = await getInitialData(newGame.id);
 
-    return res.status(200).json({ ...data, matchID: newGame.id });
+    const data: IMatchUno = await db.Match_Uno.findOne({
+      where: { matchID: newGame.id },
+      raw: true,
+    });
+
+    return res.status(200).json({
+      color: data.currentColor,
+      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
+      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
+      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
+      isClockwise: data.isClockwise,
+      lastCard: data.lastCard,
+      nextPlayer: data.nextPlayer,
+      remainingCardsLength: JSON.parse(data.remainingCards).length,
+      remainingPlayers: JSON.parse(data.remainingPlayers),
+      userCards: JSON.parse(data.userCards),
+      matchID: newGame.id,
+    });
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {
@@ -40,7 +56,7 @@ export const newUnoGame = async (req: Request | any, res: Response) => {
 };
 
 export const playerTurn = async (req: Request | any, res: Response) => {
-  const { matchID, card, color = null } = req.body;
+  const { matchID, card, color } = req.body;
 
   if (!matchID || !card)
     return res
@@ -166,9 +182,9 @@ export const buyCard = async (req: Request | any, res: Response) => {
 
     return res.status(200).json({
       color: data.currentColor,
-      cpu1CardsLength: data.cpu1Cards.length,
-      cpu2CardsLength: data.cpu2Cards.length,
-      cpu3CardsLength: data.cpu3Cards.length,
+      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
+      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
+      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
       isClockwise: data.isClockwise,
       lastCard: data.lastCard,
       nextPlayer: data.nextPlayer,
