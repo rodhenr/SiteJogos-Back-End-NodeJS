@@ -49,6 +49,7 @@ export const newUnoGame = async (req: Request | any, res: Response) => {
         message: err.message,
       });
     }
+
     return res.status(500).json({
       message: "Ocorreu um erro no servidor. Tente novamente mais tarde.",
     });
@@ -193,6 +194,7 @@ export const buyCard = async (req: Request | any, res: Response) => {
       userCards: JSON.parse(data.userCards),
     });
   } catch (err: any) {
+    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,
@@ -243,6 +245,7 @@ export const skipTurn = async (req: Request | any, res: Response) => {
       userCards: JSON.parse(data.userCards),
     });
   } catch (err: any) {
+    console.log(err);
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         message: err.message,
