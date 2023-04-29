@@ -1,15 +1,23 @@
 import { Request, Response } from "express";
 import db from "../../models";
 
-import { IMatchUno, IUser } from "../../interfaces/InfoInterface";
+import {
+  IMatchProcessingWithResult,
+  IMatchUno,
+  IMatchUnoWithMatch,
+  IUnoMatchState,
+  IUser,
+} from "../../interfaces/InfoInterface";
 import {
   buyCardAction,
-  getInitialData,
   cpuAction,
   playerAction,
   skipTurnAction,
 } from "../../services/games/UnoService";
-import { startNewGame } from "../../services/games/generalService";
+import {
+  getUnoMatchState,
+  startNewGame,
+} from "../../services/games/generalService";
 
 export const newUnoGame = async (req: Request | any, res: Response) => {
   try {
@@ -24,25 +32,9 @@ export const newUnoGame = async (req: Request | any, res: Response) => {
 
     const newGame = await startNewGame(userInfo.id, 1, new Date());
 
-    const data: IMatchUno = await db.Match_Uno.findOne({
-      where: { matchID: newGame.id },
-      raw: true,
-    });
+    const data: IUnoMatchState = await getUnoMatchState(newGame.id);
 
-    return res.status(200).json({
-      color: data.currentColor,
-      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
-      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
-      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
-      isClockwise: data.isClockwise,
-      lastCard: data.lastCard,
-      nextPlayer: data.nextPlayer,
-      remainingCardsLength: JSON.parse(data.remainingCards).length,
-      remainingPlayers: JSON.parse(data.remainingPlayers),
-      userCards: JSON.parse(data.userCards),
-      turn: data.turn,
-      matchID: newGame.id,
-    });
+    return res.status(200).json(data);
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {
@@ -77,24 +69,9 @@ export const playerTurn = async (req: Request | any, res: Response) => {
 
     await playerAction(matchID, card, color);
 
-    const data: IMatchUno = await db.Match_Uno.findOne({
-      where: { matchID },
-      raw: true,
-    });
+    const data: IUnoMatchState = await getUnoMatchState(matchID);
 
-    return res.status(200).json({
-      color: data.currentColor,
-      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
-      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
-      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
-      isClockwise: data.isClockwise,
-      lastCard: data.lastCard,
-      nextPlayer: data.nextPlayer,
-      remainingCardsLength: JSON.parse(data.remainingCards).length,
-      remainingPlayers: JSON.parse(data.remainingPlayers),
-      userCards: JSON.parse(data.userCards),
-      turn: data.turn,
-    });
+    return res.status(200).json(data);
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {
@@ -128,24 +105,9 @@ export const cpuTurn = async (req: Request | any, res: Response) => {
 
     await cpuAction(matchID);
 
-    const data: IMatchUno = await db.Match_Uno.findOne({
-      where: { matchID },
-      raw: true,
-    });
+    const data: IUnoMatchState = await getUnoMatchState(matchID);
 
-    return res.status(200).json({
-      color: data.currentColor,
-      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
-      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
-      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
-      isClockwise: data.isClockwise,
-      lastCard: data.lastCard,
-      nextPlayer: data.nextPlayer,
-      remainingCardsLength: JSON.parse(data.remainingCards).length,
-      remainingPlayers: JSON.parse(data.remainingPlayers),
-      userCards: JSON.parse(data.userCards),
-      turn: data.turn,
-    });
+    return res.status(200).json(data);
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {
@@ -179,24 +141,9 @@ export const buyCard = async (req: Request | any, res: Response) => {
 
     await buyCardAction(matchID, player);
 
-    const data: IMatchUno = await db.Match_Uno.findOne({
-      where: { matchID },
-      raw: true,
-    });
+    const data: IUnoMatchState = await getUnoMatchState(matchID);
 
-    return res.status(200).json({
-      color: data.currentColor,
-      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
-      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
-      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
-      isClockwise: data.isClockwise,
-      lastCard: data.lastCard,
-      nextPlayer: data.nextPlayer,
-      remainingCardsLength: JSON.parse(data.remainingCards).length,
-      remainingPlayers: JSON.parse(data.remainingPlayers),
-      userCards: JSON.parse(data.userCards),
-      turn: data.turn,
-    });
+    return res.status(200).json(data);
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {
@@ -230,25 +177,16 @@ export const skipTurn = async (req: Request | any, res: Response) => {
 
     await skipTurnAction(matchID, player);
 
-    //Prourar dados partidas AQUI
-    const data: IMatchUno = await db.Match_Uno.findOne({
-      where: { matchID },
-      raw: true,
-    });
+    const data: IUnoMatchState = await getUnoMatchState(matchID);
 
-    return res.status(200).json({
-      color: data.currentColor,
-      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
-      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
-      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
-      isClockwise: data.isClockwise,
-      lastCard: data.lastCard,
-      nextPlayer: data.nextPlayer,
-      remainingCardsLength: JSON.parse(data.remainingCards).length,
-      remainingPlayers: JSON.parse(data.remainingPlayers),
-      userCards: JSON.parse(data.userCards),
-      turn: data.turn,
-    });
+    return res
+      .status(200)
+      .json({
+        gameResult: data.gameResult,
+        isGameOver: data.isGameOver,
+        nextPlayer: data.nextPlayer,
+        turn: data.turn,
+      });
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {

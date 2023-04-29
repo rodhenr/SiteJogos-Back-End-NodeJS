@@ -56,11 +56,11 @@ export const playerMovement = async (
     await transaction.commit();
 
     return {
-      message: "Jogada efetuada.",
-      isGameOver: isGameOver.isGameOver,
-      gameResult: isGameOver.result,
-      isPlayerNext: false,
       cells: Object.values(updatedMatch),
+      gameResult: isGameOver.result,
+      isGameOver: isGameOver.isGameOver,
+      isPlayerNext: false,
+      message: "Jogada efetuada.",
     };
   } catch (err: any) {
     console.log(err);

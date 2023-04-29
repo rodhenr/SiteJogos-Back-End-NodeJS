@@ -240,3 +240,28 @@ export interface ICardsObj {
   cpu2Cards: string[];
   cpu3Cards: string[];
 }
+
+export interface IMatchProcessingWithResult {
+  id: number;
+  matchID: number;
+  date: Date;
+  resultID: number;
+  "Config_Result.id": number;
+  "Config_Result.result": string;
+}
+
+export interface IUnoMatchState {
+  color: string | null;
+    cpu1CardsLength: any;
+    cpu2CardsLength: any;
+    cpu3CardsLength: any;
+    isClockwise: boolean;
+    isGameOver: boolean;
+    gameResult: string | null;
+    lastCard: string | null;
+    nextPlayer: string | null,
+    remainingCardsLength: number | null,
+    remainingPlayers: string,
+    userCards: string,
+    turn: number | null;
+}
