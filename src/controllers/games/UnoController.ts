@@ -40,6 +40,7 @@ export const newUnoGame = async (req: Request | any, res: Response) => {
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
       userCards: JSON.parse(data.userCards),
+      turn: data.turn,
       matchID: newGame.id,
     });
   } catch (err: any) {
@@ -92,6 +93,7 @@ export const playerTurn = async (req: Request | any, res: Response) => {
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
       userCards: JSON.parse(data.userCards),
+      turn: data.turn,
     });
   } catch (err: any) {
     console.log(err);
@@ -142,6 +144,7 @@ export const cpuTurn = async (req: Request | any, res: Response) => {
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
       userCards: JSON.parse(data.userCards),
+      turn: data.turn,
     });
   } catch (err: any) {
     console.log(err);
@@ -192,6 +195,7 @@ export const buyCard = async (req: Request | any, res: Response) => {
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
       userCards: JSON.parse(data.userCards),
+      turn: data.turn,
     });
   } catch (err: any) {
     console.log(err);
@@ -234,15 +238,16 @@ export const skipTurn = async (req: Request | any, res: Response) => {
 
     return res.status(200).json({
       color: data.currentColor,
-      cpu1CardsLength: data.cpu1Cards.length,
-      cpu2CardsLength: data.cpu2Cards.length,
-      cpu3CardsLength: data.cpu3Cards.length,
+      cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
+      cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
+      cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
       isClockwise: data.isClockwise,
       lastCard: data.lastCard,
       nextPlayer: data.nextPlayer,
       remainingCardsLength: JSON.parse(data.remainingCards).length,
       remainingPlayers: JSON.parse(data.remainingPlayers),
       userCards: JSON.parse(data.userCards),
+      turn: data.turn,
     });
   } catch (err: any) {
     console.log(err);

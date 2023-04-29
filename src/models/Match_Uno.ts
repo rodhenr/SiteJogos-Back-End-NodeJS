@@ -50,6 +50,10 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
         defaultValue: null,
         type: DataTypes.STRING(10),
       },
+      turn: {
+        defaultValue: null,
+        type: DataTypes.INTEGER,
+      },
       userCards: {
         allowNull: false,
         type: DataTypes.STRING(1000),

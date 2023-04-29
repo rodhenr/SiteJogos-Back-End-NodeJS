@@ -47,11 +47,15 @@ module.exports = {
           key: "card",
         },
         onDelete: "CASCADE",
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       currentColor: {
         defaultValue: null,
         type: Sequelize.STRING(10),
+      },
+      turn: {
+        defaultValue: null,
+        type: Sequelize.INTEGER,
       },
       userCards: {
         allowNull: false,

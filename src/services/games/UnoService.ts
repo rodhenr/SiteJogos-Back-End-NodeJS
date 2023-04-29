@@ -4,7 +4,8 @@ import {
   IConfigUnoCards,
   IMatchUnoWithMatch,
 } from "../../interfaces/InfoInterface";
-import db, { sequelize } from "../../models";
+import db from "../../models";
+import { conn } from "../../config/conn";
 import { createErrorObject, processGameResult } from "./generalService";
 
 export const getInitialData = async (matchID: number) => {
@@ -30,6 +31,7 @@ export const getInitialData = async (matchID: number) => {
     remainingCardsLength: JSON.parse(match.remainingCards).length,
     remainingPlayers: JSON.parse(match.remainingPlayers),
     userCards: JSON.parse(match.userCards),
+    turn: !match.turn ? 1 : match.turn + 1,
   };
 };
 
@@ -38,8 +40,8 @@ export const playerAction = async (
   card: string,
   color: null | string = null
 ) => {
-  const transaction = await sequelize.transaction();
-  console.log("here");
+  const transaction = await conn.transaction();
+
   try {
     const match: IMatchUnoWithMatch = await db.Match_Uno.findOne({
       include: [{ model: db.Match }],
@@ -68,8 +70,11 @@ export const playerAction = async (
 
     const remainingPlayers = JSON.parse(match.remainingPlayers);
 
-    if (remainingPlayers.length < 2)
-      return await handleGameOver(matchID, remainingPlayers, transaction);
+    if (remainingPlayers.length < 2) {
+      const data = await handleGameOver(matchID, remainingPlayers);
+      await transaction.commit();
+      return data;
+    }
 
     const playerCardConfig: IConfigUnoCards = await db.Config_UnoCard.findOne({
       where: { card },
@@ -99,6 +104,7 @@ export const playerAction = async (
         gameHistory: JSON.stringify(data.gameHistory),
         lastCard: card,
         nextPlayer: data.nextPlayer,
+        remainingCards: JSON.stringify(data.remainingCards),
         remainingPlayers: JSON.stringify(data.remainingPlayers),
         userCards: JSON.stringify(data.userCards),
       },
@@ -112,14 +118,13 @@ export const playerAction = async (
     if (err?.statusCode && err?.mesage) {
       throw createErrorObject(err.message, err.statusCode);
     } else {
+      console.log(err);
       throw new Error(err);
     }
   }
 };
 
 export const cpuAction = async (matchID: number) => {
-  const transaction = await sequelize.transaction();
-  console.log("here");
   try {
     const match: IMatchUnoWithMatch = await db.Match_Uno.findOne({
       include: [{ model: db.Match }],
@@ -139,8 +144,24 @@ export const cpuAction = async (matchID: number) => {
 
     const remainingPlayers = JSON.parse(match.remainingPlayers);
 
-    if (remainingPlayers.length < 2)
-      return await handleGameOver(matchID, remainingPlayers, transaction);
+    if (remainingPlayers.length < 2) {
+      const data = await handleGameOver(matchID, remainingPlayers);
+
+      return data;
+    }
+
+    if (JSON.parse(match.remainingCards).length === 0) {
+      const arrMoves = await hasPlayerWithRemainingMove(match);
+      const isGameOver = arrMoves.every((move) => move === false);
+
+      if (isGameOver) {
+        await processGameResult(
+          matchID,
+          remainingPlayers.includes("user") ? "lose" : "win"
+        );
+        return;
+      }
+    }
 
     const cpuCards: string[] = JSON.parse(
       match[
@@ -168,18 +189,14 @@ export const cpuAction = async (matchID: number) => {
       })
     );
 
-    console.log("validating...", arrValidMoves);
-
     const moveIndex = arrValidMoves.findIndex((move) => move === true);
 
     if (moveIndex === -1) {
       if (JSON.parse(match.remainingCards).length > 0) {
         await buyCardAction(matchID, player);
-
         return;
       } else {
         await skipTurnAction(matchID, player);
-
         return;
       }
     }
@@ -206,16 +223,15 @@ export const cpuAction = async (matchID: number) => {
         gameHistory: JSON.stringify(data.gameHistory),
         lastCard: choosedCard,
         nextPlayer: data.nextPlayer,
+        remainingCards: JSON.stringify(data.remainingCards),
         remainingPlayers: JSON.stringify(data.remainingPlayers),
+        turn: data.turn,
         userCards: JSON.stringify(data.userCards),
       },
-      { where: { matchID } },
-      transaction
+      { where: { matchID } }
     );
-
-    await transaction.commit();
   } catch (err: any) {
-    await transaction.rollback();
+    console.log(err);
     if (err?.statusCode && err?.mesage) {
       throw createErrorObject(err.message, err.statusCode);
     } else {
@@ -371,13 +387,25 @@ const handlePlay = (
   const nextPlayerWithName = `${nextPlayer}Cards`;
 
   if (choosedCard.card.startsWith("plusTwo")) {
-    cardsObj[nextPlayerWithName as keyof ICardsObj].push(
-      ...remainingCards.splice(0, 2)
-    );
+    if (remainingCards.length < 2) {
+      cardsObj[nextPlayerWithName as keyof ICardsObj].push(
+        ...remainingCards.splice(0, remainingCards.length)
+      );
+    } else {
+      cardsObj[nextPlayerWithName as keyof ICardsObj].push(
+        ...remainingCards.splice(0, 2)
+      );
+    }
   } else if (choosedCard.card.startsWith("plusFour")) {
-    cardsObj[nextPlayerWithName as keyof ICardsObj].push(
-      ...remainingCards.splice(0, 4)
-    );
+    if (remainingCards.length < 4) {
+      cardsObj[nextPlayerWithName as keyof ICardsObj].push(
+        ...remainingCards.splice(0, remainingCards.length)
+      );
+    } else {
+      cardsObj[nextPlayerWithName as keyof ICardsObj].push(
+        ...remainingCards.splice(0, 4)
+      );
+    }
   }
 
   let hasNoCardsLeft = false;
@@ -407,19 +435,15 @@ const handlePlay = (
     nextPlayer,
     remainingCards,
     remainingPlayers,
+    turn: !match.turn ? 1 : match.turn + 1,
     userCards: cardsObj.userCards,
   };
 };
 
-const handleGameOver = async (
-  matchID: number,
-  remainingPlayers: string[],
-  transaction: Transaction
-) => {
+const handleGameOver = async (matchID: number, remainingPlayers: string[]) => {
   const data = await processGameResult(
     matchID,
-    remainingPlayers.includes("user") ? "lose" : "win",
-    transaction
+    remainingPlayers.includes("user") ? "lose" : "win"
   );
 
   return data;
@@ -471,6 +495,7 @@ export const buyCardAction = async (matchID: number, player: string) => {
         cpu3Cards: JSON.stringify(cardsObj.cpu3Cards),
         remainingCards: JSON.stringify(remainingCards),
         nextPlayer,
+        turn: !match.turn ? 1 : match.turn + 1,
       },
       { where: { matchID } }
     );
@@ -507,7 +532,52 @@ export const skipTurnAction = async (matchID: number, player: string) => {
   await db.Match_Uno.update(
     {
       nextPlayer,
+      turn: !match.turn ? 1 : match.turn + 1,
     },
     { where: { matchID } }
   );
+};
+
+const hasPlayerWithRemainingMove = async (match: IMatchUnoWithMatch) => {
+  try {
+    const cpu1CheckMoves = await checkArrMoves(
+      JSON.parse(match.cpu1Cards),
+      match
+    );
+    const cpu2CheckMoves = await checkArrMoves(
+      JSON.parse(match.cpu2Cards),
+      match
+    );
+    const cpu3CheckMoves = await checkArrMoves(
+      JSON.parse(match.cpu3Cards),
+      match
+    );
+    const userCheckMoves = await checkArrMoves(
+      JSON.parse(match.userCards),
+      match
+    );
+
+    return [cpu1CheckMoves, cpu2CheckMoves, cpu3CheckMoves, userCheckMoves];
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+const checkArrMoves = async (arr: any[], match: IMatchUnoWithMatch) => {
+  const checkMoves = await Promise.all(
+    arr.map(async (card: any) => {
+      const playerCardConfig: IConfigUnoCards = await db.Config_UnoCard.findOne(
+        {
+          where: { card: card },
+          raw: true,
+        }
+      );
+
+      return await checkValidPlay(playerCardConfig, match, match.currentColor);
+    })
+  );
+
+  const hasValidMovesUser = checkMoves.findIndex((move) => move === true);
+
+  return hasValidMovesUser === -1 ? false : true;
 };

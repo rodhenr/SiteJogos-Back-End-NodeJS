@@ -4,8 +4,9 @@ import {
   IMatchTicTacToeCells,
   IMatchTicTacToeWithMatch,
 } from "../../interfaces/InfoInterface";
-import db, { sequelize } from "../../models";
+import db from "../../models";
 import { createErrorObject, processGameResult } from "./generalService";
+import { conn } from "../../config/conn";
 
 export const playerMovement = async (
   matchID: number,
@@ -32,7 +33,7 @@ export const playerMovement = async (
   )
     throw createErrorObject("Posição de jogada inválida.", 400);
 
-  const transaction = await sequelize.transaction();
+  const transaction = await conn.transaction();
 
   try {
     await db.Match_TicTacToe.update(
@@ -106,7 +107,7 @@ export const cpuMovement = async (matchID: number, userID: number) => {
     raw: true,
   });
 
-  const transaction = await sequelize.transaction();
+  const transaction = await conn.transaction();
 
   try {
     const checkResultCPU = await checkGameOver(
@@ -203,13 +204,13 @@ const checkGameOver = async (
 
   try {
     if (checkUserWin) {
-      await processGameResult(matchID, "win", transaction);
+      await processGameResult(matchID, "win");
       return { isGameOver: true, result: "win" };
     } else if (checkCPUWin) {
-      await processGameResult(matchID, "lose", transaction);
+      await processGameResult(matchID, "lose");
       return { isGameOver: true, result: "lose" };
     } else if (checkDraw) {
-      await processGameResult(matchID, "draw", transaction);
+      await processGameResult(matchID, "draw");
       return { isGameOver: true, result: "draw" };
     }
 
@@ -236,7 +237,7 @@ const earlyMatchResultCheck = async (
     isUserCell_9: match.isUserCell_9,
   };
 
-  const transaction = await sequelize.transaction();
+  const transaction = await conn.transaction();
 
   try {
     const checkResult = await checkGameOver(

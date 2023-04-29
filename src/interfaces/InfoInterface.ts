@@ -206,6 +206,7 @@ export interface IMatchUno {
   gameHistory: null | string;
   lastCard: null | string;
   currentColor: null | string;
+  turn: null | number;
   userCards: string;
   cpu1Cards: string;
   cpu2Cards: string;

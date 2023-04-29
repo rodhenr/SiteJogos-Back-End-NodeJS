@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 
-import db, { sequelize } from "../../models";
+import db from "../../models";
 
 import {
   IJokenpoChoice,
@@ -9,6 +9,7 @@ import {
 } from "../../interfaces/InfoInterface";
 
 import { createErrorObject, processGameResult } from "./generalService";
+import { conn } from "../../config/conn";
 
 export const handlePlayerChoice = async (
   matchID: number,
@@ -58,7 +59,7 @@ export const handlePlayerChoice = async (
 
   if (!matchResult) throw createErrorObject("Resultado não encontrado.", 400);
 
-  const transaction = await sequelize.transaction();
+  const transaction = await conn.transaction();
 
   try {
     await db.Match_Jokenpo.update(
@@ -72,8 +73,7 @@ export const handlePlayerChoice = async (
 
     await processGameResult(
       matchID,
-      matchResult["Config_Result.result"],
-      transaction
+      matchResult["Config_Result.result"]
     );
 
     await transaction.commit();

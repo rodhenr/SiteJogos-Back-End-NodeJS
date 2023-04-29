@@ -8,7 +8,8 @@ import {
   IUser,
 } from "../../interfaces/InfoInterface";
 
-import db, { sequelize } from "../../models";
+import db from "../../models";
+import { conn } from "../../config/conn";
 
 export const startNewGame = async (
   userID: number,
@@ -22,7 +23,7 @@ export const startNewGame = async (
 
   if (!gameInfo) throw createErrorObject("Este jogo não existe.", 400);
 
-  const transaction = await sequelize.transaction();
+  const transaction = await conn.transaction();
 
   try {
     const newMatch: IMatch = await db.Match.create(
@@ -109,11 +110,7 @@ const createUnoGame = async (transaction: Transaction, matchID: number) => {
   );
 };
 
-export const processGameResult = async (
-  matchID: number,
-  result: string,
-  transaction: Transaction
-) => {
+export const processGameResult = async (matchID: number, result: string) => {
   const isProcessed: IMatchProcessing = await db.MatchProcessing.findOne({
     where: { matchID },
     raw: true,
@@ -164,20 +161,17 @@ export const processGameResult = async (
 
   await db.User.update(
     { experience: Number(userInfo.experience) + points },
-    { where: { id: userInfo.id } },
-    transaction
+    { where: { id: userInfo.id } }
   );
 
   const processedData: IMatchProcessing = await db.MatchProcessing.create(
     { matchID, date: Date.now(), resultID: resultData[0].id },
-    { raw: true },
-    transaction
+    { raw: true }
   );
 
   await db.Match.update(
     { matchProcessingID: processedData.id },
-    { where: { id: matchID } },
-    transaction
+    { where: { id: matchID } }
   );
 };
 

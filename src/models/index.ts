@@ -1,22 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Sequelize, DataTypes } from "sequelize";
-import process from "process";
 import { ISequelizeDB } from "../interfaces/InfoInterface";
+import { conn } from "../config/conn";
 
 type PartialDB = Partial<ISequelizeDB>;
 
 const basename: string = path.basename(__filename);
-const env: string = process.env.NODE_ENV || "development";
-const config: any = require(__dirname + "/../config/sequelize.js")[env];
 const db: PartialDB = {};
-
-export let sequelize: Sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  config
-);
 
 fs.readdirSync(__dirname)
   .filter((file) => {
@@ -28,7 +19,7 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach((file) => {
-    const model = require(path.join(__dirname, file))(sequelize, DataTypes);
+    const model = require(path.join(__dirname, file))(conn, DataTypes);
     db[model.name] = model;
   });
 
@@ -38,7 +29,7 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-db.sequelize = sequelize;
+db.sequelize = conn;
 db.Sequelize = Sequelize;
 
 export default db;
