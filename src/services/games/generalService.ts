@@ -37,6 +37,8 @@ export const startNewGame = async (
 
     if (gameInfo.name.toLowerCase() === "uno") {
       await createUnoGame(transaction, newMatch.id);
+    } else if (gameInfo.name.toLowerCase() === "yahtzee") {
+      await createYahtzeeGame(transaction, newMatch.id);
     } else {
       await createGame(gameInfo.name, transaction, newMatch.id);
     }
@@ -61,6 +63,23 @@ const createGame = async (
   await gameModel.create(
     {
       matchID,
+    },
+    { transaction }
+  );
+};
+
+const createYahtzeeGame = async (transaction: Transaction, matchID: number) => {
+  const dices: number[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    const randDice: number = Math.ceil(Math.random() * 5);
+    dices.push(randDice);
+  }
+
+  await db.Match_Yahtzee.create(
+    {
+      matchID: matchID,
+      currentDices: JSON.stringify(dices),
     },
     { transaction }
   );

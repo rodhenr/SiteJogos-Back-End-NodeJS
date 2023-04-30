@@ -252,17 +252,44 @@ export interface IMatchProcessingWithResult {
 
 export interface IUnoMatchState {
   color: string | null;
-    cpu1CardsLength: any;
-    cpu2CardsLength: any;
-    cpu3CardsLength: any;
-    isClockwise: boolean;
-    isGameOver: boolean;
-    gameResult: string | null;
-    lastCard: string | null;
-    matchID: number;
-    nextPlayer: string | null,
-    remainingCardsLength: number | null,
-    remainingPlayers: string,
-    userCards: string,
-    turn: number | null;
+  cpu1CardsLength: any;
+  cpu2CardsLength: any;
+  cpu3CardsLength: any;
+  isClockwise: boolean;
+  isGameOver: boolean;
+  gameResult: string | null;
+  lastCard: string | null;
+  matchID: number;
+  nextPlayer: string | null;
+  remainingCardsLength: number | null;
+  remainingPlayers: string;
+  userCards: string;
+  turn: number | null;
+}
+
+export interface IMatchYahtzee {
+  id: number;
+  matchID: number;
+  remainingMoves: number;
+  currentDices: string;
+  ruleSum_all: number | null;
+  ruleSum_one: number | null;
+  ruleSum_two: number | null;
+  ruleSum_three: number | null;
+  ruleSum_four: number | null;
+  ruleSum_five: number | null;
+  ruleSum_six: number | null;
+  ruleSame_three: number | null;
+  ruleSame_four: number | null;
+  rule_yahtzee: number | null;
+  ruleRow_four: number | null;
+  ruleRow_five: number | null;
+}
+
+export interface IMatchYahtzeeWithMatch extends IMatchYahtzee {
+  "Match.id": number;
+  "Match.date": Date;
+  "Match.userID": number;
+  "Match.gameID": number;
+  "Match.matchProcessingID": number;
 }

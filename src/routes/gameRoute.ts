@@ -13,6 +13,7 @@ import {
   playerTurn,
   skipTurn,
 } from "../controllers/games/UnoController";
+import { newYahtzeeGame } from "../controllers/games/YahtzeeController";
 
 const gameRoute = Router();
 
@@ -31,4 +32,5 @@ gameRoute.route("/api/games/uno/buy").post(verifyJWT, buyCard);
 gameRoute.route("/api/games/uno/skip").post(verifyJWT, skipTurn);
 gameRoute.route("/api/games/uno/cpu/move").post(verifyJWT, cpuTurn);
 
+gameRoute.route("/api/games/yahtzee/new").post(verifyJWT, newYahtzeeGame);
 export default gameRoute;
