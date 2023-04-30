@@ -259,6 +259,7 @@ export interface IUnoMatchState {
     isGameOver: boolean;
     gameResult: string | null;
     lastCard: string | null;
+    matchID: number;
     nextPlayer: string | null,
     remainingCardsLength: number | null,
     remainingPlayers: string,

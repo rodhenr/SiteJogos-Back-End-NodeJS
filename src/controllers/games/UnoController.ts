@@ -1,23 +1,16 @@
 import { Request, Response } from "express";
 import db from "../../models";
 
-import {
-  IMatchProcessingWithResult,
-  IMatchUno,
-  IMatchUnoWithMatch,
-  IUnoMatchState,
-  IUser,
-} from "../../interfaces/InfoInterface";
+import { IUnoMatchState, IUser } from "../../interfaces/InfoInterface";
 import {
   buyCardAction,
+  checkGameOver,
   cpuAction,
+  getUnoMatchState,
   playerAction,
   skipTurnAction,
 } from "../../services/games/UnoService";
-import {
-  getUnoMatchState,
-  startNewGame,
-} from "../../services/games/generalService";
+import { startNewGame } from "../../services/games/generalService";
 
 export const newUnoGame = async (req: Request | any, res: Response) => {
   try {
@@ -68,6 +61,7 @@ export const playerTurn = async (req: Request | any, res: Response) => {
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     await playerAction(matchID, card, color);
+    await checkGameOver(matchID);
 
     const data: IUnoMatchState = await getUnoMatchState(matchID);
 
@@ -104,6 +98,7 @@ export const cpuTurn = async (req: Request | any, res: Response) => {
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     await cpuAction(matchID);
+    await checkGameOver(matchID);
 
     const data: IUnoMatchState = await getUnoMatchState(matchID);
 
@@ -140,6 +135,7 @@ export const buyCard = async (req: Request | any, res: Response) => {
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     await buyCardAction(matchID, player);
+    await checkGameOver(matchID);
 
     const data: IUnoMatchState = await getUnoMatchState(matchID);
 
@@ -176,17 +172,16 @@ export const skipTurn = async (req: Request | any, res: Response) => {
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     await skipTurnAction(matchID, player);
+    await checkGameOver(matchID);
 
     const data: IUnoMatchState = await getUnoMatchState(matchID);
 
-    return res
-      .status(200)
-      .json({
-        gameResult: data.gameResult,
-        isGameOver: data.isGameOver,
-        nextPlayer: data.nextPlayer,
-        turn: data.turn,
-      });
+    return res.status(200).json({
+      gameResult: data.gameResult,
+      isGameOver: data.isGameOver,
+      nextPlayer: data.nextPlayer,
+      turn: data.turn,
+    });
   } catch (err: any) {
     console.log(err);
     if (err?.statusCode) {

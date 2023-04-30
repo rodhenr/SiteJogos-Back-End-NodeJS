@@ -6,8 +6,6 @@ import {
   IMatch,
   IPossiblePoints,
   IUser,
-  IMatchUnoWithMatch,
-  IMatchProcessingWithResult,
 } from "../../interfaces/InfoInterface";
 
 import db from "../../models";
@@ -28,7 +26,7 @@ export const startNewGame = async (
   const transaction = await conn.transaction();
 
   try {
-    const newMatch: IMatch = await db.Match.create(
+    const newMatch: any = await db.Match.create(
       {
         userID,
         gameID,
@@ -45,7 +43,7 @@ export const startNewGame = async (
 
     await transaction.commit();
 
-    return newMatch;
+    return newMatch.dataValues;
   } catch (err: any) {
     console.log(err);
     await transaction.rollback();
@@ -183,35 +181,4 @@ export const createErrorObject = (message: string, status: number) => {
   (error as any).statusCode = status;
 
   return error;
-};
-
-export const getUnoMatchState = async (matchID: number) => {
-  const data: IMatchUnoWithMatch = await db.Match_Uno.findOne({
-    include: [{ model: db.Match }],
-    where: { matchID },
-    raw: true,
-  });
-
-  const dataMatchOver: IMatchProcessingWithResult =
-    await db.MatchProcessing.findOne({
-      include: [{ model: db.Config_Result }],
-      where: { matchID },
-      raw: true,
-    });
-
-  return {
-    color: data.currentColor,
-    cpu1CardsLength: JSON.parse(data.cpu1Cards).length,
-    cpu2CardsLength: JSON.parse(data.cpu2Cards).length,
-    cpu3CardsLength: JSON.parse(data.cpu3Cards).length,
-    isClockwise: data.isClockwise,
-    isGameOver: dataMatchOver ? true : false,
-    gameResult: dataMatchOver ? dataMatchOver["Config_Result.result"] : null,
-    lastCard: data.lastCard,
-    nextPlayer: data.nextPlayer,
-    remainingCardsLength: JSON.parse(data.remainingCards).length,
-    remainingPlayers: JSON.parse(data.remainingPlayers),
-    userCards: JSON.parse(data.userCards),
-    turn: data.turn,
-  };
 };
