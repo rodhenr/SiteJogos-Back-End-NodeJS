@@ -2,7 +2,10 @@ import db from "../../models";
 
 import { createErrorObject } from "./generalService";
 
-import { IMatchYahtzeeWithMatch } from "../../interfaces/InfoInterface";
+import {
+  IMatchProcessingWithResult,
+  IMatchYahtzeeWithMatch,
+} from "../../interfaces/InfoInterface";
 
 type sameKind = {
   [key: string]: number;
@@ -18,8 +21,10 @@ export const getYahtzeeInicialData = async (matchID: number) => {
   if (!match) throw createErrorObject("Partida não encontrada.", 400);
 
   return {
-    id: match.id,
     matchID: matchID,
+    isGameOver: false,
+    gameResult: null,
+    points: null,
     remainingMoves: match.remainingMoves,
     currentDices: JSON.parse(match.currentDices),
     ruleSum_all: match.ruleSum_all,
@@ -37,7 +42,93 @@ export const getYahtzeeInicialData = async (matchID: number) => {
   };
 };
 
-export const singlePoints = (dices: number[], rule: number) => {
+export const handleRollDice = async (matchID: number, dices: string) => {
+  try {
+    const match: IMatchYahtzeeWithMatch = await db.Match_Yahtzee.findOne({
+      include: [{ model: db.Match }],
+      where: { matchID },
+      raw: true,
+    });
+
+    if (!match) throw createErrorObject("Partida não encontrada.", 400);
+
+    if (match.remainingMoves === 0)
+      throw createErrorObject(
+        "Não é mais possível jogar os dados nesse turno.",
+        400
+      );
+
+    const dicesRequest: boolean[] = JSON.parse(dices);
+    const currentDices: number[] = JSON.parse(match.currentDices);
+
+    if (currentDices.length !== 5)
+      throw createErrorObject(
+        "Número incorreto de valores no parâmetro 'dados'.",
+        400
+      );
+
+    console.log(currentDices);
+    for (let i = 0; i < 5; i++) {
+      const randDice: number = Math.ceil(Math.random() * 6);
+
+      if (dicesRequest[i] === false) {
+        currentDices[i] = randDice;
+      }
+    }
+
+    await db.Match_Yahtzee.update(
+      {
+        remainingMoves: match.remainingMoves - 1,
+        currentDices: JSON.stringify(currentDices),
+      },
+      { where: { matchID } }
+    );
+  } catch (err: any) {
+    console.log(err);
+  }
+};
+
+export const getYahtzeeGameState = async (matchID: number) => {
+  const data: IMatchYahtzeeWithMatch = await db.Match_Yahtzee.findOne({
+    include: [{ model: db.Match }],
+    where: { matchID },
+    raw: true,
+  });
+
+  const dataMatchOver: IMatchProcessingWithResult =
+    await db.MatchProcessing.findOne({
+      include: [{ model: db.Config_Result }],
+      where: { matchID },
+      raw: true,
+    });
+
+  return {
+    matchID: matchID,
+    isGameOver: dataMatchOver ? true : false,
+    gameResult: dataMatchOver ? dataMatchOver["Config_Result.result"] : null,
+    points: null,
+    remainingMoves: data.remainingMoves,
+    currentDices: JSON.parse(data.currentDices),
+    ruleSum_all: data.ruleSum_all,
+    ruleSum_one: data.ruleSum_one,
+    ruleSum_two: data.ruleSum_two,
+    ruleSum_three: data.ruleSum_three,
+    ruleSum_four: data.ruleSum_four,
+    ruleSum_five: data.ruleSum_five,
+    ruleSum_six: data.ruleSum_six,
+    ruleSame_three: data.ruleSame_three,
+    ruleSame_four: data.ruleSame_four,
+    rule_yahtzee: data.rule_yahtzee,
+    ruleRow_four: data.ruleRow_four,
+    ruleRow_five: data.ruleRow_five,
+  };
+};
+
+export const useYahtzeeRule = async(matchID: number, ruleName: string) => {
+  
+}
+
+const singlePoints = (dices: number[], rule: number) => {
   let score = 0;
 
   dices.forEach((i) => {
@@ -47,7 +138,7 @@ export const singlePoints = (dices: number[], rule: number) => {
   return score;
 };
 
-export const sameDices = (dices: number[], rule: number) => {
+const sameDices = (dices: number[], rule: number) => {
   let score = 0;
   let count: sameKind = {};
 
@@ -70,7 +161,7 @@ export const sameDices = (dices: number[], rule: number) => {
   return score;
 };
 
-export const inARow = (dices: number[], rule: number) => {
+const inARow = (dices: number[], rule: number) => {
   let score = 0;
   let count: sameKind = {};
 
@@ -98,7 +189,7 @@ export const inARow = (dices: number[], rule: number) => {
   return score;
 };
 
-export const sumDices = (dices: number[]) => {
+const sumDices = (dices: number[]) => {
   let score = 0;
 
   dices.forEach((item) => {

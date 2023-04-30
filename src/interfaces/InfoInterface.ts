@@ -293,3 +293,24 @@ export interface IMatchYahtzeeWithMatch extends IMatchYahtzee {
   "Match.gameID": number;
   "Match.matchProcessingID": number;
 }
+
+export interface IMatchYahtzeeState {
+  matchID: number;
+  isGameOver: boolean;
+  gameResult: string | null;
+  points: number | null;
+  remainingMoves: number;
+  currentDices: string;
+  ruleSum_all: number | null;
+  ruleSum_one: number | null;
+  ruleSum_two: number | null;
+  ruleSum_three: number | null;
+  ruleSum_four: number | null;
+  ruleSum_five: number | null;
+  ruleSum_six: number | null;
+  ruleSame_three: number | null;
+  ruleSame_four: number | null;
+  rule_yahtzee: number | null;
+  ruleRow_four: number | null;
+  ruleRow_five: number | null;
+}
