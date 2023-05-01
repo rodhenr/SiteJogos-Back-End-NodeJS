@@ -5,6 +5,8 @@ import { createErrorObject } from "./generalService";
 import {
   IMatchProcessingWithResult,
   IMatchYahtzeeWithMatch,
+  IYahtzeeRules,
+  IYahtzeeRulesObject,
 } from "../../interfaces/InfoInterface";
 
 type sameKind = {
@@ -67,7 +69,6 @@ export const handleRollDice = async (matchID: number, dices: string) => {
         400
       );
 
-    console.log(currentDices);
     for (let i = 0; i < 5; i++) {
       const randDice: number = Math.ceil(Math.random() * 6);
 
@@ -124,35 +125,103 @@ export const getYahtzeeGameState = async (matchID: number) => {
   };
 };
 
-export const useYahtzeeRule = async(matchID: number, ruleName: string) => {
-  
-}
+export const useYahtzeeRule = async (matchID: number, ruleName: string) => {
+  const match: IMatchYahtzeeWithMatch = await db.Match_Yahtzee.findOne({
+    include: [{ model: db.Match }],
+    where: { matchID },
+    raw: true,
+  });
 
-const singlePoints = (dices: number[], rule: number) => {
+  if (!match) throw createErrorObject("Partida não encontrada.", 400);
+
+  const rulesObject: IYahtzeeRulesObject = {
+    ruleSum_all: { value: 0, method: handleRule_sumAll },
+    ruleSum_one: { value: 1, method: handleRule_sum },
+    ruleSum_two: { value: 2, method: handleRule_sum },
+    ruleSum_three: { value: 3, method: handleRule_sum },
+    ruleSum_four: { value: 4, method: handleRule_sum },
+    ruleSum_five: { value: 5, method: handleRule_sum },
+    ruleSum_six: { value: 6, method: handleRule_sum },
+    ruleSame_three: { value: 3, method: handleRule_same },
+    ruleSame_four: { value: 4, method: handleRule_same },
+    rule_yahtzee: { value: 0, method: () => 1 },
+    ruleRow_four: { value: 4, method: handleRule_row },
+    ruleRow_five: { value: 5, method: handleRule_row },
+  };
+
+  if (
+    !Object.keys(rulesObject).includes(ruleName) ||
+    !Object.keys(match).includes(ruleName)
+  )
+    throw createErrorObject("Regra não encontrada.", 400);
+
+  if (match[ruleName as keyof IYahtzeeRules] !== null)
+    throw createErrorObject("Você já pontuou para essa regra.", 400);
+
+  const dices = JSON.parse(match.currentDices);
+  const rule = rulesObject[ruleName as keyof IYahtzeeRules];
+  const score = rule.method(dices, rule.value);
+
+  await updateUserPoints(matchID, ruleName, score);
+};
+
+const updateUserPoints = async (
+  matchID: number,
+  ruleName: string,
+  points: number
+) => {
+  const dices: number[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    const randDice: number = Math.ceil(Math.random() * 5);
+    dices.push(randDice);
+  }
+
+  await db.Match_Yahtzee.update(
+    {
+      remainingMoves: 2,
+      [ruleName]: points,
+      currentDices: JSON.stringify(dices),
+    },
+    { where: { matchID } }
+  );
+};
+
+const handleRule_sumAll = (dices: number[], ruleParam: number) => {
   let score = 0;
 
-  dices.forEach((i) => {
-    if (i === rule) score += rule;
+  dices.forEach((dice) => {
+    score += dice;
   });
 
   return score;
 };
 
-const sameDices = (dices: number[], rule: number) => {
+const handleRule_sum = (dices: number[], ruleParam: number) => {
+  let score = 0;
+
+  dices.forEach((dice) => {
+    if (dice === ruleParam) score += ruleParam;
+  });
+
+  return score;
+};
+
+const handleRule_same = (dices: number[], ruleParam: number) => {
   let score = 0;
   let count: sameKind = {};
 
-  for (const el of dices) {
-    count[el] ? (count[el] += 1) : (count[el] = 1);
+  for (const dice of dices) {
+    count[dice] ? (count[dice] += 1) : (count[dice] = 1);
   }
 
-  Object.values(count).forEach((i) => {
-    if (i >= rule) {
-      if (rule === 5) {
+  Object.values(count).forEach((value) => {
+    if (value >= ruleParam) {
+      if (ruleParam === 5) {
         score = 50;
       } else {
-        dices.forEach((item) => {
-          score += item;
+        dices.forEach((dice) => {
+          score += dice;
         });
       }
     }
@@ -161,15 +230,15 @@ const sameDices = (dices: number[], rule: number) => {
   return score;
 };
 
-const inARow = (dices: number[], rule: number) => {
+const handleRule_row = (dices: number[], ruleParam: number) => {
   let score = 0;
   let count: sameKind = {};
 
-  for (const el of dices) {
-    count[el] ? (count[el] += 1) : (count[el] = 1);
+  for (const dice of dices) {
+    count[dice] ? (count[dice] += 1) : (count[dice] = 1);
   }
 
-  if (rule === 4) {
+  if (ruleParam === 4) {
     if (
       (count[1] && count[2] && count[3] && count[4]) ||
       (count[2] && count[3] && count[4] && count[5]) ||
@@ -185,16 +254,6 @@ const inARow = (dices: number[], rule: number) => {
       score = 40;
     }
   }
-
-  return score;
-};
-
-const sumDices = (dices: number[]) => {
-  let score = 0;
-
-  dices.forEach((item) => {
-    score += item;
-  });
 
   return score;
 };

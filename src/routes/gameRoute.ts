@@ -14,6 +14,7 @@ import {
   skipTurn,
 } from "../controllers/games/UnoController";
 import {
+  calculateRulePoints,
   newYahtzeeGame,
   rollDice,
 } from "../controllers/games/YahtzeeController";
@@ -37,5 +38,6 @@ gameRoute.route("/api/games/uno/cpu/move").post(verifyJWT, cpuTurn);
 
 gameRoute.route("/api/games/yahtzee/new").post(verifyJWT, newYahtzeeGame);
 gameRoute.route("/api/games/yahtzee/roll").post(verifyJWT, rollDice);
+gameRoute.route("/api/games/yahtzee/rule").post(verifyJWT, calculateRulePoints);
 
 export default gameRoute;

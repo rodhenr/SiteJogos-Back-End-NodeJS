@@ -314,3 +314,38 @@ export interface IMatchYahtzeeState {
   ruleRow_four: number | null;
   ruleRow_five: number | null;
 }
+
+export interface IYahtzeeObject {
+  value: number;
+  method: (dices: number[], ruleParam: number) => number;
+}
+
+export interface IYahtzeeRulesObject {
+  ruleSum_all: IYahtzeeObject;
+  ruleSum_one: IYahtzeeObject;
+  ruleSum_two: IYahtzeeObject;
+  ruleSum_three: IYahtzeeObject;
+  ruleSum_four: IYahtzeeObject;
+  ruleSum_five: IYahtzeeObject;
+  ruleSum_six: IYahtzeeObject;
+  ruleSame_three: IYahtzeeObject;
+  ruleSame_four: IYahtzeeObject;
+  rule_yahtzee: IYahtzeeObject;
+  ruleRow_four: IYahtzeeObject;
+  ruleRow_five: IYahtzeeObject;
+}
+
+export interface IYahtzeeRules {
+  ruleSum_all: number | null;
+  ruleSum_one: number | null;
+  ruleSum_two: number | null;
+  ruleSum_three: number | null;
+  ruleSum_four: number | null;
+  ruleSum_five: number | null;
+  ruleSum_six: number | null;
+  ruleSame_three: number | null;
+  ruleSame_four: number | null;
+  rule_yahtzee: number | null;
+  ruleRow_four: number | null;
+  ruleRow_five: number | null;
+}
