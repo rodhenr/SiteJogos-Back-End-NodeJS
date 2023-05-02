@@ -44,7 +44,7 @@ export const getYahtzeeInicialData = async (matchID: number) => {
   };
 };
 
-export const handleRollDice = async (matchID: number, dices: string) => {
+export const handleRollDice = async (matchID: number, dices: boolean[]) => {
   try {
     const match: IMatchYahtzeeWithMatch = await db.Match_Yahtzee.findOne({
       include: [{ model: db.Match }],
@@ -60,7 +60,6 @@ export const handleRollDice = async (matchID: number, dices: string) => {
         400
       );
 
-    const dicesRequest: boolean[] = JSON.parse(dices);
     const currentDices: number[] = JSON.parse(match.currentDices);
 
     if (currentDices.length !== 5)
@@ -72,7 +71,7 @@ export const handleRollDice = async (matchID: number, dices: string) => {
     for (let i = 0; i < 5; i++) {
       const randDice: number = Math.ceil(Math.random() * 6);
 
-      if (dicesRequest[i] === false) {
+      if (dices[i] === false) {
         currentDices[i] = randDice;
       }
     }
@@ -104,12 +103,12 @@ export const getYahtzeeGameState = async (matchID: number) => {
     });
 
   return {
-    matchID: matchID,
+    currentDices: JSON.parse(data.currentDices),
     isGameOver: dataMatchOver ? true : false,
     gameResult: dataMatchOver ? dataMatchOver["Config_Result.result"] : null,
+    matchID: matchID,
     points: null,
     remainingMoves: data.remainingMoves,
-    currentDices: JSON.parse(data.currentDices),
     ruleSum_all: data.ruleSum_all,
     ruleSum_one: data.ruleSum_one,
     ruleSum_two: data.ruleSum_two,

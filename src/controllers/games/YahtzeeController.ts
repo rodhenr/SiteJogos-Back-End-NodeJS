@@ -77,7 +77,10 @@ export const rollDice = async (req: Request | any, res: Response) => {
   }
 };
 
-export const calculateRulePoints = async (req: Request | any, res: Response) => {
+export const calculateRulePoints = async (
+  req: Request | any,
+  res: Response
+) => {
   const { matchID, ruleName } = req.body;
 
   if (!matchID || !ruleName)

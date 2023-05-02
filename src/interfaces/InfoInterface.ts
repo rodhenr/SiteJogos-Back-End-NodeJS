@@ -295,12 +295,12 @@ export interface IMatchYahtzeeWithMatch extends IMatchYahtzee {
 }
 
 export interface IMatchYahtzeeState {
-  matchID: number;
+  currentDices: number[];
   isGameOver: boolean;
   gameResult: string | null;
+  matchID: number;
   points: number | null;
   remainingMoves: number;
-  currentDices: string;
   ruleSum_all: number | null;
   ruleSum_one: number | null;
   ruleSum_two: number | null;
