@@ -1,8 +1,9 @@
 import db from "../../models";
 
-import { createErrorObject } from "./generalService";
+import { createErrorObject, processGameResult } from "./generalService";
 
 import {
+  IConfig_Result,
   IMatchProcessingWithResult,
   IMatchYahtzeeWithMatch,
   IYahtzeeRules,
@@ -255,4 +256,54 @@ const handleRule_row = (dices: number[], ruleParam: number) => {
   }
 
   return score;
+};
+
+export const checkYahtzeeGameOver = async (matchID: number) => {
+  const match: IMatchYahtzeeWithMatch = await db.Match_Yahtzee.findOne({
+    include: [{ model: db.Match }],
+    where: { matchID },
+    raw: true,
+  });
+
+  const resultTypes: IConfig_Result[] = await db.Config_Result.findAll({
+    raw: true,
+  });
+
+  const rules: (number | null)[] = [
+    match.ruleSum_all,
+    match.ruleSum_one,
+    match.ruleSum_two,
+    match.ruleSum_three,
+    match.ruleSum_four,
+    match.ruleSum_five,
+    match.ruleSum_six,
+    match.ruleSame_three,
+    match.ruleSame_four,
+    match.rule_yahtzee,
+    match.ruleRow_four,
+    match.ruleRow_five,
+  ];
+
+  const isGameOver: boolean = rules.every((rule) => rule !== null);
+
+  if (isGameOver) {
+    const points = rules.reduce((acc, cur) => acc! + cur!);
+    const result: string = points! > 150 ? "win" : "lose";
+    const gameResult: IConfig_Result[] = resultTypes.filter(
+      (r: IConfig_Result) => {
+        return r.result === result;
+      }
+    );
+
+    await processGameResult(matchID, result);
+
+    await db.Match_Yahtzee.update(
+      {
+        isGameOver: true,
+        gameResult: gameResult[0].result,
+        points,
+      },
+      { where: { matchID } }
+    );
+  }
 };

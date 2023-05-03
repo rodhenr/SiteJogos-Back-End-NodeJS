@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import db from "../../models";
 
 import {
+  checkYahtzeeGameOver,
   getYahtzeeGameState,
   getYahtzeeInicialData,
   handleRollDice,
@@ -97,6 +98,8 @@ export const calculateRulePoints = async (
     if (!userInfo) res.status(401).json({ message: "Usuário inválido." });
 
     await useYahtzeeRule(matchID, ruleName);
+
+    await checkYahtzeeGameOver(matchID);
 
     const data: IMatchYahtzeeState = await getYahtzeeGameState(matchID);
 
