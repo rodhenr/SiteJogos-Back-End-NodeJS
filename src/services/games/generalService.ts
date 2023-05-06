@@ -90,7 +90,7 @@ const createUnoGame = async (transaction: Transaction, matchID: number) => {
   const randNum = Math.floor(Math.random() * 4);
   const nextPlayer = arrPlayers[randNum];
 
-  const allCards: any[] = await db.Config_UnoCard.findAll({
+  const allCards: { card: string }[] = await db.Config_UnoCard.findAll({
     attributes: ["card"],
     raw: true,
   });

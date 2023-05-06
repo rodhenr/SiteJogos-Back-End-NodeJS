@@ -252,9 +252,9 @@ export interface IMatchProcessingWithResult {
 
 export interface IUnoMatchState {
   color: string | null;
-  cpu1CardsLength: any;
-  cpu2CardsLength: any;
-  cpu3CardsLength: any;
+  cpu1CardsLength: number;
+  cpu2CardsLength: number;
+  cpu3CardsLength: number;
   isClockwise: boolean;
   isGameOver: boolean;
   gameResult: string | null;

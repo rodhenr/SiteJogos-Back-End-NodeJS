@@ -45,7 +45,7 @@ export const createTokens = (name: string, user: string) => {
   return { accessToken, refreshToken };
 };
 
-export const verifyRefreshToken = (refreshToken: any) => {
+export const verifyRefreshToken = (refreshToken: string) => {
   if (!process.env.jwt_secret || !process.env.jwt_secret_refresh)
     throw createErrorObject("Configurações do servidor não encontradas.", 500);
 

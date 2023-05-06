@@ -566,9 +566,9 @@ const hasPlayerWithRemainingMove = async (match: IMatchUnoWithMatch) => {
   }
 };
 
-const checkArrMoves = async (arr: any[], match: IMatchUnoWithMatch) => {
+const checkArrMoves = async (arr: string[], match: IMatchUnoWithMatch) => {
   const checkMoves = await Promise.all(
-    arr.map(async (card: any) => {
+    arr.map(async (card: string) => {
       const playerCardConfig: IConfigUnoCards = await db.Config_UnoCard.findOne(
         {
           where: { card: card },
@@ -580,7 +580,9 @@ const checkArrMoves = async (arr: any[], match: IMatchUnoWithMatch) => {
     })
   );
 
-  const hasValidMovesUser = checkMoves.findIndex((move) => move === true);
+  const hasValidMovesUser: number = checkMoves.findIndex(
+    (move) => move === true
+  );
 
   return hasValidMovesUser === -1 ? false : true;
 };
