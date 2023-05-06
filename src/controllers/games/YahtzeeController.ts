@@ -11,7 +11,7 @@ import {
 } from "../../services/games/YahtzeeService";
 import { startNewGame } from "../../services/games/generalService";
 
-import { IUser, IMatchYahtzeeState } from "../../interfaces/InfoInterface";
+import { IUser, IMatchYahtzeeState } from "../../interfaces/interfaces";
 
 export const newYahtzeeGame = async (req: Request | any, res: Response) => {
   try {

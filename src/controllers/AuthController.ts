@@ -7,7 +7,6 @@ import {
   createTokens,
   verifyRefreshToken,
 } from "../services/authService";
-
 import { findOneUser } from "../services/userService";
 
 const handleRegister = async (req: Request, res: Response) => {

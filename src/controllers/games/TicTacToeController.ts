@@ -4,7 +4,7 @@ import {
   cpuMovement,
   playerMovement,
 } from "../../services/games/TicTacToeService";
-import { IUser } from "../../interfaces/InfoInterface";
+import { IUser } from "../../interfaces/interfaces";
 
 export const playerMove = async (req: Request | any, res: Response) => {
   const { matchID, squarePosition } = req.body;

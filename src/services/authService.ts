@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { IJWTDecoded } from "../interfaces/InfoInterface";
+import { IJWTDecoded } from "../interfaces/interfaces";
 
 import db from "../models";
 import { createErrorObject } from "./games/generalService";

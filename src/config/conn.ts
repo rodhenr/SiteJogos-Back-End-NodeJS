@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
 require("dotenv").config();
-const tedious = require("tedious");
 
 export const conn: Sequelize = new Sequelize(
   "db_games_app",

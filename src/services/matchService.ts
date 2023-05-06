@@ -1,9 +1,5 @@
 import { Op } from "sequelize";
-import {
-  IUserMatches,
-  IRecentMatches,
-  IUser,
-} from "../interfaces/InfoInterface";
+import { IUserMatches, IRecentMatches, IUser } from "../interfaces/interfaces";
 
 import db from "../models";
 import { createErrorObject } from "./games/generalService";

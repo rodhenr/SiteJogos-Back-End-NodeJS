@@ -6,7 +6,7 @@ import {
   IUserSafe,
   IGameStats,
   IUserFriends,
-} from "../interfaces/InfoInterface";
+} from "../interfaces/interfaces";
 
 import db from "../models";
 import { createErrorObject } from "./games/generalService";
@@ -139,15 +139,9 @@ export const findUserStatistics = async (id: number) => {
         return statistic.game === match["Game.name"];
       });
 
-      const isDraw =
-        match["MatchProcessing.Config_Result.result"] ===
-        "draw";
-      const isWin =
-        match["MatchProcessing.Config_Result.result"] ===
-        "win";
-      const isLose =
-        match["MatchProcessing.Config_Result.result"] ===
-        "lose";
+      const isDraw = match["MatchProcessing.Config_Result.result"] === "draw";
+      const isWin = match["MatchProcessing.Config_Result.result"] === "win";
+      const isLose = match["MatchProcessing.Config_Result.result"] === "lose";
 
       if (gameIndex === -1) {
         statistics.push({

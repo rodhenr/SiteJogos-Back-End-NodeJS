@@ -4,7 +4,7 @@ import db from "../../models";
 
 import { startNewGame } from "../../services/games/generalService";
 
-import { IMatch, IUser } from "../../interfaces/InfoInterface";
+import { IMatch, IUser } from "../../interfaces/interfaces";
 
 export const newMatch = async (req: Request | any, res: Response) => {
   const { gameID } = req.body;
@@ -31,7 +31,7 @@ export const newMatch = async (req: Request | any, res: Response) => {
       Number(gameID),
       date
     );
-    
+
     return res.status(200).json({ matchID: newGame.id });
   } catch (err: any) {
     if (err?.statusCode) {

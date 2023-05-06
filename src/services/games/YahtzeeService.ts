@@ -8,7 +8,7 @@ import {
   IMatchYahtzeeWithMatch,
   IYahtzeeRules,
   IYahtzeeRulesObject,
-} from "../../interfaces/InfoInterface";
+} from "../../interfaces/interfaces";
 
 type sameKind = {
   [key: string]: number;

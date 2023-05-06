@@ -3,7 +3,7 @@ import {
   IMatchTicTacToe,
   IMatchTicTacToeCells,
   IMatchTicTacToeWithMatch,
-} from "../../interfaces/InfoInterface";
+} from "../../interfaces/interfaces";
 import db from "../../models";
 import { createErrorObject, processGameResult } from "./generalService";
 import { conn } from "../../config/conn";

@@ -6,7 +6,7 @@ import {
   IJokenpoChoice,
   IJokenpoResultWithConfigResult,
   IMatchJokenpoWithMatch,
-} from "../../interfaces/InfoInterface";
+} from "../../interfaces/interfaces";
 
 import { createErrorObject, processGameResult } from "./generalService";
 import { conn } from "../../config/conn";
@@ -71,10 +71,7 @@ export const handlePlayerChoice = async (
       transaction
     );
 
-    await processGameResult(
-      matchID,
-      matchResult["Config_Result.result"]
-    );
+    await processGameResult(matchID, matchResult["Config_Result.result"]);
 
     await transaction.commit();
 

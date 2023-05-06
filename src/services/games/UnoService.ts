@@ -4,7 +4,7 @@ import {
   IConfigUnoCards,
   IMatchProcessingWithResult,
   IMatchUnoWithMatch,
-} from "../../interfaces/InfoInterface";
+} from "../../interfaces/interfaces";
 import db from "../../models";
 import { conn } from "../../config/conn";
 import { createErrorObject, processGameResult } from "./generalService";

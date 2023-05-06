@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import db from "../../models";
 
-import { IUser } from "../../interfaces/InfoInterface";
+import { IUser } from "../../interfaces/interfaces";
 
 import { handlePlayerChoice } from "../../services/games/JokenpoService";
 

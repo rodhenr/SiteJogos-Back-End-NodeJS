@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Sequelize, DataTypes } from "sequelize";
-import { ISequelizeDB } from "../interfaces/InfoInterface";
+import { ISequelizeDB } from "../interfaces/interfaces";
 import { conn } from "../config/conn";
 
 type PartialDB = Partial<ISequelizeDB>;

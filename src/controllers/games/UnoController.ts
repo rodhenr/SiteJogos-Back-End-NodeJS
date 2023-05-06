@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import db from "../../models";
 
-import { IUnoMatchState, IUser } from "../../interfaces/InfoInterface";
+import { IUnoMatchState, IUser } from "../../interfaces/interfaces";
 import {
   buyCardAction,
   checkGameOver,
