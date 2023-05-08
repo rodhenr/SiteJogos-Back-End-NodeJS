@@ -10,7 +10,6 @@ Para este projeto foram utilizadas as seguintes tecnologias:
 - [Express](https://expressjs.com/pt-br/)
 - [Sequelize](https://sequelize.org/)
 - [Nodemon](https://www.npmjs.com/package/nodemon)
-- [Cors](https://www.npmjs.com/package/cors)
 - [JWT](https://jwt.io/)
 - [Bcrypt](https://www.npmjs.com/package/bcrypt)
 - [Dotenv](https://www.npmjs.com/package/dotenv)
